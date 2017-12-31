@@ -4,4 +4,5 @@
 module MemoryIO
 end
 
+require 'memory_io/io'
 require 'memory_io/version'
