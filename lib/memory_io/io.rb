@@ -93,7 +93,7 @@ module MemoryIO
     #   #=> ["123", "4567"]
     #
     # @note
-    #   This method has different arguments and return value compared with +::IO#read+.
+    #   This method's arguments and return value are different with +::IO#read+.
     #   Check documents and examples.
     def read(num_elements, from: nil, as: nil, force_array: false)
       stream.pos = from if from

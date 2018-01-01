@@ -14,8 +14,18 @@ TBD
 
 ## Usage
 
+### Read Process's Memory
 ```
 require 'memory_io'
 
-io = MemoryIO::IO.new(File.open('/proc/self/mem'))
+process = MemoryIO.attach(`pidof victim`.to_i)
+puts process.read('heap', 4, as: :u64).map { |c| '0x%016x' % c }
+# 0x0000000000000000
+# 0x0000000000000021
+# 0x00000000deadbeef
+# 0x0000000000000000
+#=> nil
+
+process.read('heap+0x10', 4, as: :u8).map { |c| '0x%x' % c }
+#=> ['0xef', '0xbe', '0xad', '0xde']
 ```
