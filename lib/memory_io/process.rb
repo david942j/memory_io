@@ -20,13 +20,14 @@ module MemoryIO
     # @todo
     #   Support Windows
     def initialize(pid)
+      @pid = pid
       @mem = "/proc/#{pid}/mem"
       # check permission of '/proc/pid/mem'
       @perm = MemoryIO::Util.file_permission(@mem)
       # TODO: raise custom exception
       raise Errno::ENOENT, @mem if perm.nil?
       # FIXME: use logger
-      STDERR.puts(<<-EOS.strip) unless perm.readable? || perm.writable?
+      warn(<<-EOS.strip) unless perm.readable? || perm.writable?
 You have no permission to read/write this process.
 
 Check the setting of /proc/sys/kernel/yama/ptrace_scope, or try
@@ -38,6 +39,39 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       EOS
     end
 
+    # Parse +/proc/[pid]/maps+ to get all bases.
+    #
+    # @return [{Symbol => Integer}]
+    #   Hash of bases.
+    #
+    # @example
+    #   process = Process.new(`pidof victim`.to_i)
+    #   puts process.bases.map { |key, val| format('%s: 0x%016x', key, val) }
+    #   # vsyscall: 0xffffffffff600000
+    #   # vdso: 0x00007ffd5b565000
+    #   # vvar: 0x00007ffd5b563000
+    #   # stack: 0x00007ffd5ad21000
+    #   # ld: 0x00007f339a69b000
+    #   # libc: 0x00007f33996f1000
+    #   # heap: 0x00005571994a1000
+    #   # victim: 0x0000557198bcb000
+    #   #=> nil
+    def bases
+      file = "/proc/#{@pid}/maps"
+      stat = MemoryIO::Util.file_permission(file)
+      return {} if stat.nil? || !stat.readable?
+      maps = ::IO.binread(file).lines.map do |line|
+        # "7f76515cf000-7f76515da000 r-xp 00000000 fd:01 29360257  /lib/x86_64-linux-gnu/libnss_files-2.24.so
+        addr, _perm, _offset, _dev, _inode, pathname = line.split(' ', 6)
+        next nil if pathname.nil? || pathname.empty?
+        addr = addr.to_i(16)
+        pathname = ::File.basename(pathname.strip)
+        pathname = pathname[1..-2] if pathname =~ /^\[.+\]$/
+        [MemoryIO::Util.trim_libname(pathname).to_sym, addr]
+      end
+      maps.compact.reverse.to_h
+    end
+
     # Read from process's memory.
     #
     # This method has *almost* same arguements and return types as {IO#read}.
@@ -47,6 +81,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     # @param [Integer, String] addr
     #   The address start to read.
     #   When String is given, it will be safe-evaluated.
+    #   You can use variables such as +'heap'/'stack'/'libc'+ in this parameter.
     #   See examples.
     # @param [Integer] num_elements
     #   Number of elements to read. See {IO#read}.
@@ -65,8 +100,11 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   process.read('heap+0x10', 4, as: :u8).map { |c| '0x%x' % c }
     #   #=> ['0xef', '0xbe', '0xad', '0xde']
     #
+    #   process.read('libc', 4)
+    #   #=> "\x7fELF"
     # @see IO#read
     def read(addr, num_elements, **options)
+      addr = MemoryIO::Util.safe_eval(addr, bases)
       File.open(@mem, 'rb') do |f|
         MemoryIO::IO.new(f).read(num_elements, from: addr, **options)
       end

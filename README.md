@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/david942j/memory_io.svg?branch=master)](https://travis-ci.org/david942j/memory_io)
+[![Gem Version](https://badge.fury.io/rb/memory_io.svg)](https://badge.fury.io/rb/memory_io)
 [![Maintainability](https://api.codeclimate.com/v1/badges/dc8da34c5a8ab0095530/maintainability)](https://codeclimate.com/github/david942j/memory_io/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/dc8da34c5a8ab0095530/test_coverage)](https://codeclimate.com/github/david942j/memory_io/test_coverage)
 [![Inline docs](https://inch-ci.org/github/david942j/memory_io.svg?branch=master)](https://inch-ci.org/github/david942j/memory_io)
@@ -10,7 +11,11 @@ Read/Write complicated structures in memory easily.
 
 ## Installation
 
-TBD
+Available on RubyGems.org!
+
+```bash
+$ gem install memory_io
+```
 
 ## Usage
 
@@ -28,4 +33,7 @@ puts process.read('heap', 4, as: :u64).map { |c| '0x%016x' % c }
 
 process.read('heap+0x10', 4, as: :u8).map { |c| '0x%x' % c }
 #=> ['0xef', '0xbe', '0xad', '0xde']
+
+process.read('libc', 4)
+#=> "\x7fELF"
 ```
