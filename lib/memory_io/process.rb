@@ -76,7 +76,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #
     # This method has *almost* same arguements and return types as {IO#read}.
     # The only difference is this method needs parameter +addr+ (which
-    # will be passed to paramter +from+ in {IO#reada}).
+    # will be passed to paramter +from+ in {IO#read}).
     #
     # @param [Integer, String] addr
     #   The address start to read.
@@ -107,6 +107,33 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       addr = MemoryIO::Util.safe_eval(addr, bases)
       File.open(@mem, 'rb') do |f|
         MemoryIO::IO.new(f).read(num_elements, from: addr, **options)
+      end
+    end
+
+    # Write objects at +addr+.
+    #
+    # This method has *almost* same arguments as {IO#write}.
+    #
+    # @param [Integer, String] addr
+    #   The address to start to write.
+    #   See examples.
+    # @param [Object, Array<Object>] objects
+    #   Objects to write.
+    #   If +objects+ is an array, the write procedure will be invoked +objects.size+ times.
+    #
+    # @return [void]
+    #
+    # @example
+    #   process = MemoryIO.attach('self')
+    #   s = 'A' * 16
+    #   process.write(s.object_id * 2 + 16, 'BBBBCCCC')
+    #   s
+    #   #=> 'BBBBCCCCAAAAAAAA'
+    # @see IO#write
+    def write(addr, objects, **options)
+      addr = MemoryIO::Util.safe_eval(addr, bases)
+      File.open(@mem, 'wb') do |f|
+        MemoryIO::IO.new(f).write(objects, from: addr, **options)
       end
     end
   end

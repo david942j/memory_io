@@ -20,7 +20,7 @@ $ gem install memory_io
 ## Usage
 
 ### Read Process's Memory
-```
+```ruby
 require 'memory_io'
 
 process = MemoryIO.attach(`pidof victim`.to_i)
