@@ -30,7 +30,8 @@ module MemoryIO
     #   Types.find(:u64)
     #   #=> #<MemoryIO::Types::Number:0x000055ecc017a310 @bytes=8, @pack_str="Q", @signed=false>
     def find(name)
-      Types::Type.find(Util.underscore(name.to_s).to_sym)
+      obj = Types::Type.find(name)
+      return obj.obj if obj
     end
 
     # @api private

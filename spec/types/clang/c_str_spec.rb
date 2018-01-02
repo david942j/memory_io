@@ -13,4 +13,8 @@ describe MemoryIO::Types::Clang::CStr do
     described_class.write(stream, '123')
     expect(stream.string).to eq "123\x00"
   end
+
+  it 'doc' do
+    expect(MemoryIO::Types::Type.find(:c_str).doc).to eq "A null-terminated string.\n"
+  end
 end

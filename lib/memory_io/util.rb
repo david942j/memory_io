@@ -8,7 +8,7 @@ module MemoryIO
 
     # Convert input into snake-case.
     #
-    # This method also removes strings before +'::'+ in +str+.
+    # This method also converts +'::'+ to +'/'+.
     #
     # @param [String] str
     #   String to be converted.
@@ -21,10 +21,10 @@ module MemoryIO
     #   #=> 'memory_io'
     #
     #   Util.underscore('MyModule::MyClass')
-    #   #=> 'my_class'
+    #   #=> 'my_module/my_class'
     def underscore(str)
       return '' if str.empty?
-      str = str.split('::').last
+      str = str.gsub('::', '/')
       str.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
       str.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
       str.downcase!
