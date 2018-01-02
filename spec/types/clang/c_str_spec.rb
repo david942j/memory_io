@@ -1,8 +1,8 @@
 # encoding: ascii-8bit
 
-require 'memory_io/types/c_str'
+require 'memory_io/types/clang/c_str'
 
-describe MemoryIO::Types::CStr do
+describe MemoryIO::Types::Clang::CStr do
   it 'read' do
     stream = StringIO.new("abcd\x00kk\x00\x00end_of_string")
     expect(Array.new(4) { described_class.read(stream) }).to eq ['abcd', 'kk', '', 'end_of_string']

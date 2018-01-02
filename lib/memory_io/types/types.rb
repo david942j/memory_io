@@ -1,8 +1,7 @@
 require 'memory_io/types/type'
 require 'memory_io/util'
 
-require 'memory_io/types/c_str'
-require 'memory_io/types/number'
+Dir[File.join(__dir__, '**', '*.rb')].each { |f| require f }
 
 module MemoryIO
   # Module that includes multiple types.

@@ -1,6 +1,6 @@
-require 'memory_io/types/number'
+require 'memory_io/types/basic/number'
 
-describe MemoryIO::Types::Number do
+describe MemoryIO::Types::Basic::Number do
   describe :read do
     it 'unsigned' do
       stream = StringIO.new("\xff" * 100)
