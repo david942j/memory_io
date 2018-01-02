@@ -27,7 +27,9 @@ module MemoryIO
           @map[symbol] = klass
         end
 
-        # TO record descendants.
+        # @api private
+        #
+        # To record descendants.
         def inherited(klass)
           register(MemoryIO::Util.underscore(klass.name).to_sym, klass)
         end

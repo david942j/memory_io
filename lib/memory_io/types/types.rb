@@ -15,24 +15,27 @@ module MemoryIO
     #
     # Returns the class whose name matches +name+.
     #
-    # This method would search all descendants of {Types::Type}.
+    # This method will search all descendants of {Types::Type}.
     #
     # @return [Symbol] name
     #   Class name to be searched.
     #
-    # @return [Class?]
-    #   The class.
+    # @return [#read, #write]
+    #   Any object that implemented method +read+ and +write+.
+    #   Usually returns a class inherit {Types::Type}.
     #
     # @example
-    #   Types.find(:u64)
-    #   #=> MemoryIO::Types::U64
-    #
     #   Types.find(:c_str)
     #   #=> MemoryIO::Types::CStr
+    #
+    #   Types.find(:u64)
+    #   #=> #<MemoryIO::Types::Number:0x000055ecc017a310 @bytes=8, @pack_str="Q", @signed=false>
     def find(name)
       Types::Type.find(Util.underscore(name.to_s).to_sym)
     end
 
+    # @api private
+    #
     # Returns a callable object according to +name+.
     #
     # @param [Symbol] name

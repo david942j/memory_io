@@ -33,7 +33,7 @@ module MemoryIO
 
       def unpack(str)
         val = str.unpack(@pack_str).first
-        val -= (2**@bytes) if @signed && val >= (2**(@bytes - 1))
+        val -= (2**(@bytes * 8)) if @signed && val >= (2**(@bytes * 8 - 1))
         val
       end
 
@@ -41,15 +41,15 @@ module MemoryIO
         [val].pack(@pack_str)
       end
 
-      # Register (un)signed n-bites integers.
+      # Register (un)signed n-bits integers.
       {
         8 => 'C',
         16 => 'S',
         32 => 'I',
         64 => 'Q'
       }.each do |t, c|
-        Type.register("s#{t}".to_sym, Number.new(t, true, c))
-        Type.register("u#{t}".to_sym, Number.new(t, false, c))
+        Type.register("s#{t}".to_sym, Number.new(t / 8, true, c))
+        Type.register("u#{t}".to_sym, Number.new(t / 8, false, c))
       end
 
       # Register floating numbers.

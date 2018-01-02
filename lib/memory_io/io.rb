@@ -1,3 +1,5 @@
+# encoding: ascii-8bit
+
 require 'memory_io/types/types'
 
 module MemoryIO
@@ -27,7 +29,7 @@ module MemoryIO
     # @param [Integer?] from
     #   Invoke +stream.pos = from+ before starting to read.
     #   +nil+ for not changing current position of stream.
-    # @param [nil, Symbol, MemoryIO::Types, Proc] as
+    # @param [nil, Symbol, Proc] as
     #   Decide the type/structure when reading.
     #   See {MemoryIO::Types} for all supported types.
     #
@@ -58,7 +60,7 @@ module MemoryIO
     #
     # @example
     #   stream = StringIO.new('A' * 8 + 'B' * 8)
-    #   io = MemoryIO.new(stream)
+    #   io = MemoryIO::IO.new(stream)
     #   io.read(9)
     #   #=> "AAAAAAAAB"
     #   io.read(100)
@@ -74,7 +76,7 @@ module MemoryIO
     #   #=> [16962]
     # @example
     #   stream = StringIO.new("\xef\xbe\xad\xde")
-    #   io = MemoryIO.new(stream)
+    #   io = MemoryIO::IO.new(stream)
     #   io.read(1, as: :u32)
     #   #=> 3735928559
     #   io.rewind
@@ -82,19 +84,21 @@ module MemoryIO
     #   #=> -559038737
     # @example
     #   stream = StringIO.new("123\x0045678\x00")
-    #   io = MemoryIO.new(stream)
+    #   io = MemoryIO::IO.new(stream)
     #   io.read(2, as: :c_str)
     #   #=> ["123", "45678"]
     # @example
     #   # pass lambda to `as`
     #   stream = StringIO.new("\x03123\x044567")
-    #   io = MemoryIO.new(stream)
+    #   io = MemoryIO::IO.new(stream)
     #   io.read(2, as: lambda { |stream| stream.read(stream.read(1).ord) })
     #   #=> ["123", "4567"]
     #
     # @note
     #   This method's arguments and return value are different with +::IO#read+.
     #   Check documents and examples.
+    #
+    # @see Types
     def read(num_elements, from: nil, as: nil, force_array: false)
       stream.pos = from if from
       return stream.read(num_elements) if as.nil?
@@ -103,6 +107,53 @@ module MemoryIO
       ret = Array.new(num_elements) { conv.call(stream) }
       ret = ret.first if num_elements == 1 && !force_array
       ret
+    end
+
+    # Write to stream.
+    #
+    # @param [Object, Array<Object>] objects
+    #   Objects to be written.
+    #
+    # @param [Integer] from
+    #   The position to start to write.
+    #
+    # @param [nil, Symbol, Proc] as
+    #   Decide the method to process writing procedure.
+    #   See {MemoryIO::Types} for all supported types.
+    #
+    #   A +Proc+ is allowed, which should accept +stream+ and one object as arguments.
+    #
+    #   If +nil+ is given, this method will simply call +stream.write(objects)+.
+    #
+    # @return [void]
+    #
+    # @example
+    #   stream = StringIO.new
+    #   io = MemoryIO::IO.new(stream)
+    #   io.write('abcd')
+    #   stream.string
+    #   #=> "abcd"
+    #
+    #   io.write([1, 2, 3, 4], from: 2, as: :u16)
+    #   stream.string
+    #   #=> "ab\x01\x00\x02\x00\x03\x00\x04\x00"
+    #
+    #   io.write(['A', 'BB', 'CCC'], from: 0, as: :c_str)
+    #   stream.string
+    #   #=> "A\x00BB\x00CCC\x00\x00"
+    # @example
+    #   stream = StringIO.new
+    #   io = MemoryIO::IO.new(stream)
+    #   io.write(%w[123 4567], as: ->(s, str) { s.write(str.size.chr + str) })
+    #   stream.string
+    #   #=> "\x03123\x044567"
+    #
+    # @see Types
+    def write(objects, from: nil, as: nil)
+      stream.pos = from if from
+      return stream.write(objects) if as.nil?
+      conv = to_proc(as, :write)
+      Array(objects).map { |o| conv.call(stream, o) }
     end
 
     # Set +stream+ to the beginning.
@@ -115,8 +166,10 @@ module MemoryIO
 
     private
 
+    # @api private
     def to_proc(as, rw)
-      ret = as.respond_to?(:call) ? as : MemoryIO::Types.get_proc(as, rw)
+      ret = as.respond_to?(rw) ? as.method(rw) : as
+      ret = ret.respond_to?(:call) ? ret : MemoryIO::Types.get_proc(ret, rw)
       raise ArgumentError, <<-EOERR.strip unless ret.respond_to?(:call)
 Invalid argument `as`: #{as.inspect}. It should be either a Proc or a supported type of MemoryIO::Types.
       EOERR
