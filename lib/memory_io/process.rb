@@ -59,14 +59,14 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     def bases
       file = "/proc/#{@pid}/maps"
       stat = MemoryIO::Util.file_permission(file)
-      return {} if stat.nil? || !stat.readable?
-      maps = ::IO.binread(file).lines.map do |line|
-        # "7f76515cf000-7f76515da000 r-xp 00000000 fd:01 29360257  /lib/x86_64-linux-gnu/libnss_files-2.24.so
-        addr, _perm, _offset, _dev, _inode, pathname = line.split(' ', 6)
-        next nil if pathname.nil? || pathname.empty?
+      return {} unless stat && stat.readable?
+      maps = ::IO.binread(file).split("\n").map do |line|
+        # 7f76515cf000-7f76515da000 r-xp 00000000 fd:01 29360257  /lib/x86_64-linux-gnu/libnss_files-2.24.so
+        addr, _perm, _offset, _dev, _inode, pathname = line.strip.split(' ', 6)
+        next nil if pathname.nil?
         addr = addr.to_i(16)
-        pathname = ::File.basename(pathname.strip)
         pathname = pathname[1..-2] if pathname =~ /^\[.+\]$/
+        pathname = ::File.basename(pathname)
         [MemoryIO::Util.trim_libname(pathname).to_sym, addr]
       end
       maps.compact.reverse.to_h
