@@ -38,4 +38,28 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     process.write(s.__id__ * 2 + 16, 'abcdefgh')
     expect(s).to eq 'abcdefghAAAAAAAA'
   end
+
+  it 'use custom type' do
+    process = described_class.new('self')
+
+    class MyType < MemoryIO::Types::Type
+      def self.read(stream)
+        new(stream.read(1))
+      end
+
+      def self.write(stream, my_type)
+        stream.write(my_type.val)
+      end
+
+      attr_accessor :val
+      def initialize(val)
+        @val = val
+      end
+    end
+
+    expect(process.read('libc', 4, as: :my_type).map(&:val)).to eq ["\x7f", 'E', 'L', 'F']
+
+    process.write('libc', MyType.new('MEOW'), as: :my_type)
+    expect(process.read('libc', 4)).to eq 'MEOW'
+  end
 end

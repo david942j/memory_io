@@ -104,10 +104,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   #=> "\x7fELF"
     # @see IO#read
     def read(addr, num_elements, **options)
-      addr = MemoryIO::Util.safe_eval(addr, bases)
-      File.open(@mem, 'rb') do |f|
-        MemoryIO::IO.new(f).read(num_elements, from: addr, **options)
-      end
+      mem_io(:read) { |io| io.read(num_elements, from: MemoryIO::Util.safe_eval(addr, bases), **options) }
     end
 
     # Write objects at +addr+.
@@ -131,10 +128,14 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   #=> 'BBBBCCCCAAAAAAAA'
     # @see IO#write
     def write(addr, objects, **options)
-      addr = MemoryIO::Util.safe_eval(addr, bases)
-      File.open(@mem, 'wb') do |f|
-        MemoryIO::IO.new(f).write(objects, from: addr, **options)
-      end
+      mem_io(:write) { |io| io.write(objects, from: MemoryIO::Util.safe_eval(addr, bases), **options) }
+    end
+
+    private
+
+    def mem_io(perm)
+      flags = perm == :write ? 'wb' : 'rb'
+      File.open(@mem, flags) { |f| yield MemoryIO::IO.new(f) }
     end
   end
 end

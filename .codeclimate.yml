@@ -32,14 +32,12 @@ checks:
       threshold: 4
   similar-code:
     enabled: true
+    config:
+      threshold: 25
   identical-code:
     enabled: true
 plugins:
   rubocop:
-    enabled: false
-  eslint:
-    enabled: false
-  brakeman:
     enabled: false
 exclude_patterns:
   - "spec/"

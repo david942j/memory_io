@@ -168,7 +168,8 @@ module MemoryIO
 
     # @api private
     def to_proc(as, rw)
-      ret = as.respond_to?(:call) ? as : MemoryIO::Types.get_proc(as, rw)
+      ret = as.respond_to?(rw) ? as.method(rw) : as
+      ret = as.respond_to?(:call) ? ret : MemoryIO::Types.get_proc(ret, rw)
       raise ArgumentError, <<-EOERR.strip unless ret.respond_to?(:call)
 Invalid argument `as`: #{as.inspect}. It should be either a Proc or a supported type of MemoryIO::Types.
       EOERR
