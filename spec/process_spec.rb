@@ -21,7 +21,6 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     process = described_class.new('self')
     expect(process.bases.keys).to include(:libc, :heap, :ruby, :ld, :stack)
     expect(process.bases.values.map { |v| v & 0xfff }.uniq).to eq [0]
-    puts process.bases.map { |key, val| format('%s: 0x%016x', key, val) }
   end
 
   it :read do
