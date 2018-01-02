@@ -59,7 +59,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
     expect(process.read('libc', 4, as: :my_type).map(&:val)).to eq ["\x7f", 'E', 'L', 'F']
 
-    process.write('libc', MyType.new('MEOW'), as: :my_type)
+    process.write('libc', MyType.new('MEOW'), as: MyType)
     expect(process.read('libc', 4)).to eq 'MEOW'
   end
 end
