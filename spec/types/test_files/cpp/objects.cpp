@@ -14,10 +14,7 @@ void handle_strings() {
   string inline_string("AAAABBBBCCCCDDD");
   string outline_string("abcdefghijklmnopqrstuvwxyz");
   printf("%p\n%p\n%p\n", &empty, &inline_string, &outline_string);
-  fprintf(stderr, "sizeof(string)=%#lx\n", sizeof(string));
   size_t **p = (size_t**) &outline_string;
-  fprintf(stderr, "%p %p %p %p\n", *p, *(p + 1), *(p + 2), *(p + 3));
-  fprintf(stderr, "%#llx\n", **p);
   pause();
   printf("%s\n", outline_string.c_str());
   pause();
