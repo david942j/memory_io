@@ -1,12 +1,75 @@
 require 'ostruct'
 
 require 'memory_io/types/record'
+require 'memory_io/util'
 
 module MemoryIO
   module Types
     # The base class, all descendents of this class would be consider as a valid 'type'.
     class Type
+      # the value of size_t
+      SIZE_T = 8
+
       class << self
+        # Read {Type::SIZE_T} bytes and cast to a little endian unsigned integer.
+        #
+        # @param [#read] stream
+        #   Stream.
+        #
+        # @return [Integer]
+        #   Result.
+        #
+        # @example
+        #   s = StringIO.new("\xEF\xBE\xAD\xDExV4\x00")
+        #   Type.read_size_t(s).to_s(16)
+        #   #=> '345678deadbeef'
+        def read_size_t(stream)
+          # assume little endian
+          MemoryIO::Util.unpack(stream.read(SIZE_T))
+        end
+
+        # Pack +val+ into {Type::SIZE_T} bytes and write to +stream+.
+        #
+        # @param [#write] stream
+        # @param [Integer] val
+        #
+        # @return [void]
+        #
+        # @example
+        #   s = StringIO.new
+        #   Type.write_size_t(s, 0x123)
+        #   s.string
+        #   #=> "\x23\x01\x00\x00\x00\x00\x00\x00"
+        def write_size_t(stream, val)
+          stream.write(MemoryIO::Util.pack(val, SIZE_T))
+        end
+
+        # Yield a block and resume the position of stream.
+        #
+        # @param [Integer] pos
+        #   Move +stream+'s pos to +pos+ before invoke the block.
+        #
+        # @yieldparam [#read] stream
+        #
+        # @yieldreturn [Object]
+        #
+        # @return [Object]
+        #   Returns the object returned by block.
+        #
+        # @example
+        #   s = StringIO.new('1234')
+        #   Type.keep_pos(s, pos: 2) { |s| s.read(2) }
+        #   #=> '34'
+        #   s.pos
+        #   #=> 0
+        def keep_pos(stream, pos: nil)
+          org = stream.pos
+          stream.pos = pos if pos
+          ret = yield stream
+          stream.pos = org
+          ret
+        end
+
         # @api private
         #
         # Find the subclass of {Type} by symbol.
@@ -58,6 +121,14 @@ Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
           raise reg_fail if keys.empty?
           rec = MemoryIO::Types::Record.new(object, keys, option)
           keys.each { |k| @map[k] = rec }
+        end
+
+        # @abstract
+        def read(_stream) raise NotImplementedError
+        end
+
+        # @abstract
+        def write(_stream, _obj) raise NotImplementedError
         end
 
         private
