@@ -1,2 +1,2 @@
 all: objects.cpp
-	g++ -std=c++11 objects.cpp -o objects -O0
+	g++-6 -std=c++14 objects.cpp -o objects -O2

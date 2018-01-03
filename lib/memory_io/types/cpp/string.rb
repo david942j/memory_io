@@ -61,6 +61,7 @@ module MemoryIO
             union = stream.read(LOCAL_CAPACITY + 1)
             if length > LOCAL_CAPACITY
               capacity = MemoryIO::Util.unpack(union[0, Type::SIZE_T])
+              p dataplus, length, capacity
               data = keep_pos(stream, pos: dataplus) { |s| s.read(length) }
             else
               capacity = LOCAL_CAPACITY

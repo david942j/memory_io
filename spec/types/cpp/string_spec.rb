@@ -53,6 +53,8 @@ EOS
       process.write(addr, string)
       i.puts
       expect(o.gets).to eq 'A' * 26 + "\n"
+      string = process.read(addr, 1, as: :'cpp/string')
+      expect(string.data).to eq 'A' * 26
     end
   end
 end
