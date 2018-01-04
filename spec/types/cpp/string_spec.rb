@@ -17,7 +17,7 @@ describe MemoryIO::Types::CPP::String do
   it :record do
     record = MemoryIO::Types::Type.find(:string)
     expect(record.doc).to eq <<-EOS
-Implement the std::string structure in C++.
+The `std::string` class in C++11.
 
 The std::string class can be seen as:
   class string {

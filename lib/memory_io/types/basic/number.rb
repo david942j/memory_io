@@ -2,14 +2,13 @@ require 'memory_io/types/type'
 
 module MemoryIO
   module Types
-    # @api private
-    #
     # Define native types such as integers and floating numbers.
     module Basic
-      # @api private
       # Register numbers to {Types}.
       #
       # All types registerd by this class are assumed as *little endian*.
+      #
+      # This class registered (un)signed {8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
       class Number
         # @param [Integer] bytes
         #   Bytes.
@@ -52,13 +51,21 @@ module MemoryIO
           32 => 'I',
           64 => 'Q'
         }.each do |t, c|
-          Type.register(Number.new(t / 8, true, c), alias: "s#{t}".to_sym)
-          Type.register(Number.new(t / 8, false, c), alias: "u#{t}".to_sym)
+          Type.register(Number.new(t / 8, true, c),
+                        alias: [:"basic/s#{t}", :"s#{t}"],
+                        doc: "A signed #{t}-bit integer.")
+          Type.register(Number.new(t / 8, false, c),
+                        alias: [:"basic/u#{t}", :"u#{t}"],
+                        doc: "An unsigned #{t}-bit integer.")
         end
 
         # Register floating numbers.
-        Type.register(Number.new(4, false, 'F'), alias: :float)
-        Type.register(Number.new(8, false, 'D'), alias: :double)
+        Type.register(Number.new(4, false, 'F'),
+                      alias: %i[basic/float float],
+                      doc: 'IEEE-754 32-bit floating number.')
+        Type.register(Number.new(8, false, 'D'),
+                      alias: %i[basic/double double],
+                      doc: 'IEEE-754 64-bit floating number.')
       end
     end
   end

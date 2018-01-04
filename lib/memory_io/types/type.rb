@@ -88,7 +88,7 @@ module MemoryIO
         # @param [#read, #write] object
         #   Normally, +object+ is a descendent class of {Type}.
         #
-        # @option [Symbol] alias
+        # @option [Symbol, Array<Symbol>] alias
         #   Custom symbol name that can be used in {.find}.
         # @option [String] doc
         #   Doc string that will be shown in README.md.
@@ -107,17 +107,23 @@ module MemoryIO
         #   Type.register(AnotherClass, alias: :my_class)
         #   # An error will be raised because the 'alias' has been registered.
         #
+        #   Type.register(AnotherClass, alias: [:my_class, my_class2])
+        #   #=> [:another_class, :my_class2]
+        #
+        # @note
+        #   If all symbols in +alias+ have been registered, an ArgumentError will be raised.
+        #   However, if at least one of aliases hasn't been used, registration will success.
+        #
         # @see .find
         def register(object, option = {})
           @map ||= OpenStruct.new
-          ali = option[:alias]
+          aliases = Array(option[:alias])
           reg_fail = ArgumentError.new(<<-EOS.strip)
 Register '#{object.inspect}' fails because other objects with same name has been registered.
 Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
           EOS
-          raise reg_fail if ali && @map[ali]
-          keys = get_keys(object).reject { |k| @map[k] }
-          keys << ali if ali
+          raise reg_fail if aliases.any? && aliases.all? { |ali| @map[ali] }
+          keys = get_keys(object).concat(aliases).uniq.reject { |k| @map[k] }
           raise reg_fail if keys.empty?
           rec = MemoryIO::Types::Record.new(object, keys, option)
           keys.each { |k| @map[k] = rec }

@@ -34,6 +34,8 @@ describe MemoryIO::Types::Type do
 Register 'String' fails because other objects with same name has been registered.
 Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
     EOS
+    syms = described_class.register(MemoryIO::Types::MyModule::MyClass, alias: %i[meow meow2])
+    expect(syms).to eq %i[meow2]
   end
 
   it :find do

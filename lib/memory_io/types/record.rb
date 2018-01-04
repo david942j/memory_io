@@ -9,6 +9,10 @@ module MemoryIO
       #   Whatever.
       attr_reader :obj
 
+      # @return [Array<Symbol>]
+      #   All symols that can find this record in {Type.find}.
+      attr_reader :keys
+
       # Instantiate a {Record} object.
       #
       # @param [Object] object

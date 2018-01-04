@@ -4,7 +4,7 @@ module MemoryIO
   module Types
     # Structures in C++.
     module CPP
-      # Implement the std::string structure in C++.
+      # The `std::string` class in C++11.
       #
       # The std::string class can be seen as:
       #   class string {
