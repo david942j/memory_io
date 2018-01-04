@@ -31,6 +31,11 @@ The std::string class can be seen as:
 EOS
   end
 
+  it :inspect do
+    str = described_class.new('meow', 15, 0x00007fffdeadbeef).inspect
+    expect(str).to eq '#<MemoryIO::Types::CPP::String @data="meow", @capacity=15, @dataplus=0x00007fffdeadbeef>'
+  end
+
   it :read do
     @launch.call do |_i, o, process|
       addrs = Array.new(3) { o.gets.to_i(16) }

@@ -16,7 +16,7 @@ module MemoryIO
       #     }
       #   };
       class String < MemoryIO::Types::Type
-        # std::string uses inlined-buffer if string lenth less than {LOCAL_CAPACITY}.
+        # std::string uses inlined-buffer if string length isn't larger than {LOCAL_CAPACITY}.
         LOCAL_CAPACITY = 15
 
         attr_reader :data # @return [::String]
@@ -51,17 +51,42 @@ module MemoryIO
           warn("Length of str (#{str.size}) is larger than capacity (#{capacity})") if str.size > capacity
         end
 
+        # Custom inspect view.
+        #
+        # @return [String]
+        #
+        # @todo
+        #   Let it be colorful in pry.
+        def inspect
+          format("#<%s @data=%s, @capacity=%d, @dataplus=0x%0#{SIZE_T * 2}x>",
+                 self.class.name,
+                 data.inspect,
+                 capacity,
+                 dataplus)
+        end
+
         class << self
           # @param [#pos, #pos=, #read] stream
           #
           # @return [CPP::String]
+          #
+          # @example
+          #   # echo '#include <string>\n#include <cstdio>\nint main() {' > a.cpp && \
+          #   # echo 'std::string a="abcd"; printf("%p\\n", &a);' >> a.cpp && \
+          #   # echo 'scanf("%*c"); return 0;}' >> a.cpp && \
+          #   # g++ -std=c++11 a.cpp -o a
+          #   Open3.popen2('stdbuf -o0 ./a') do |_i, o, t|
+          #     process = MemoryIO.attach(t.pid)
+          #     addr = o.gets.to_i(16)
+          #     process.read(addr, 1, as: :string) # or `as: :'cpp/string'`
+          #     #=> #<MemoryIO::Types::CPP::String @data="abcd", @capacity=15, @dataplus=0x00007ffe539ca250>
+          #   end
           def read(stream)
             dataplus = read_size_t(stream)
             length = read_size_t(stream)
             union = stream.read(LOCAL_CAPACITY + 1)
             if length > LOCAL_CAPACITY
               capacity = MemoryIO::Util.unpack(union[0, Type::SIZE_T])
-              p dataplus, length, capacity
               data = keep_pos(stream, pos: dataplus) { |s| s.read(length) }
             else
               capacity = LOCAL_CAPACITY
