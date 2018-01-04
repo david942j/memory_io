@@ -8,7 +8,7 @@ module MemoryIO
 
     # Convert input into snake-case.
     #
-    # This method also removes strings before +'::'+ in +str+.
+    # This method also converts +'::'+ to +'/'+.
     #
     # @param [String] str
     #   String to be converted.
@@ -21,10 +21,10 @@ module MemoryIO
     #   #=> 'memory_io'
     #
     #   Util.underscore('MyModule::MyClass')
-    #   #=> 'my_class'
+    #   #=> 'my_module/my_class'
     def underscore(str)
       return '' if str.empty?
-      str = str.split('::').last
+      str = str.gsub('::', '/')
       str.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
       str.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
       str.downcase!
@@ -75,6 +75,44 @@ module MemoryIO
       # dentaku 2 doesn't support hex
       str = str.gsub(/0x[0-9a-zA-Z]+/) { |c| c.to_i(16) }
       Dentaku::Calculator.new.store(vars).evaluate(str)
+    end
+
+    # Unpack a string into an integer.
+    # Little endian is used.
+    #
+    # @param [String] str
+    #   String.
+    #
+    # @return [Integer]
+    #   Result.
+    #
+    # @example
+    #   Util.unpack("\xff")
+    #   #=> 255
+    #   Util.unpack("@\xE2\x01\x00")
+    #   #=> 123456
+    def unpack(str)
+      str.bytes.reverse.reduce(0) { |s, c| s * 256 + c }
+    end
+
+    # Pack an integer into +b+ bytes.
+    # Little endian is used.
+    #
+    # @param [Integer] val
+    #   The integer to pack.
+    #   If +val+ contains more than +b+ bytes,
+    #   only lower +b+ bytes in +val+ will be packed.
+    #
+    # @param [Integer] b
+    #
+    # @return [String]
+    #   Packing result with length +b+.
+    #
+    # @example
+    #   Util.pack(0x123, 4)
+    #   #=> "\x23\x01\x00\x00"
+    def pack(val, b)
+      Array.new(b) { |i| (val >> (i * 8)) & 0xff }.pack('C*')
     end
 
     # Remove extension name (.so) and version in library name.

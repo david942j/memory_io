@@ -5,11 +5,11 @@ require 'memory_io/types/types'
 module MemoryIO
   # Main class to use {MemoryIO}.
   class IO
-    attr_reader :stream # @return [#pos=, #read, #write]
+    attr_reader :stream # @return [#pos, #pos=, #read, #write]
 
     # Instantiate an {IO} object.
     #
-    # @param [#pos=, #read, #write] stream
+    # @param [#pos, #pos=, #read, #write] stream
     #   The file-like object to be read/written.
     #   +file+ can be unwritable if you will not invoke any write-related method.
     #
@@ -123,7 +123,9 @@ module MemoryIO
     #
     #   A +Proc+ is allowed, which should accept +stream+ and one object as arguments.
     #
-    #   If +nil+ is given, this method will simply call +stream.write(objects)+.
+    #   If +objects+ is a descendent instance of {Types::Type} and +as+ is +nil,
+    #   +objects.class+ will be used for +as+.
+    #   Otherwise, when +as = nil+, this method will simply call +stream.write(objects)+.
     #
     # @return [void]
     #
@@ -148,9 +150,18 @@ module MemoryIO
     #   stream.string
     #   #=> "\x03123\x044567"
     #
+    # @example
+    #   stream = StringIO.new
+    #   io = MemoryIO::IO.new(stream)
+    #   cpp_string = CPP::String.new('A' * 4, 15, 16)
+    #   # equivalent to io.write(cpp_string, as: :'cpp/string')
+    #   io.write(cpp_string)
+    #   stream.string
+    #   #=> "\x10\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00AAAA\x00"
     # @see Types
     def write(objects, from: nil, as: nil)
       stream.pos = from if from
+      as ||= objects.class if objects.class.ancestors.include?(MemoryIO::Types::Type)
       return stream.write(objects) if as.nil?
       conv = to_proc(as, :write)
       Array(objects).map { |o| conv.call(stream, o) }

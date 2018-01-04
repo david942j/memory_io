@@ -53,25 +53,7 @@ process.read(0x601000, 1, as: :u64)
 
 Goto [the online document](http://www.rubydoc.info/github/david942j/memory_io/master/MemoryIO/Types) for more details
 of each type.
-
-### BASIC
-- `basic/u8`: An unsigned 8-bit integer. Also known as: `:u8`
-- `basic/u16`: An unsigned 16-bit integer. Also known as: `:u16`
-- `basic/u32`: An unsigned 32-bit integer. Also known as: `:u32`
-- `basic/u64`: An unsigned 64-bit integer. Also known as: `:u64`
-- `basic/s8`: A signed 8-bit integer. Also known as: `:s8`
-- `basic/s16`: A signed 16-bit integer. Also known as: `:s16`
-- `basic/s32`: A signed 32-bit integer. Also known as: `:s32`
-- `basic/s64`: A signed 64-bit integer. Also known as: `:s64`
-- `basic/float`: IEEE-754 32-bit floating number. Also known as: `:float`
-- `basic/double`: IEEE-754 64-bit floating number. Also known as: `:double`
-
-### CLANG
-- `clang/c_str`: A null-terminated string. Also known as: `:c_str`
-
-### CPP
-- `cpp/string`: The `std::string` class in C++11. Also known as: `:string`
-
+IMPLEMENTED_STRUCTURES
 
 ## Installation
 

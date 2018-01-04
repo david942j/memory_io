@@ -1,8 +1,7 @@
 require 'memory_io/types/type'
 require 'memory_io/util'
 
-require 'memory_io/types/c_str'
-require 'memory_io/types/number'
+Dir[File.join(__dir__, '**', '*.rb')].each { |f| require f }
 
 module MemoryIO
   # Module that includes multiple types.
@@ -31,7 +30,8 @@ module MemoryIO
     #   Types.find(:u64)
     #   #=> #<MemoryIO::Types::Number:0x000055ecc017a310 @bytes=8, @pack_str="Q", @signed=false>
     def find(name)
-      Types::Type.find(Util.underscore(name.to_s).to_sym)
+      obj = Types::Type.find(name)
+      return obj.obj if obj
     end
 
     # @api private
