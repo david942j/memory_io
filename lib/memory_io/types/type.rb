@@ -7,14 +7,14 @@ module MemoryIO
   module Types
     # The base class, all descendents of this class would be consider as a valid 'type'.
     class Type
-      # the value of size_t
+      # The size of +size_t+. i.e. +sizeof(size_t)+.
       SIZE_T = 8
 
       class << self
         # Read {Type::SIZE_T} bytes and cast to a little endian unsigned integer.
         #
         # @param [#read] stream
-        #   Stream.
+        #   Stream to read.
         #
         # @return [Integer]
         #   Result.
@@ -24,14 +24,15 @@ module MemoryIO
         #   Type.read_size_t(s).to_s(16)
         #   #=> '345678deadbeef'
         def read_size_t(stream)
-          # assume little endian
           MemoryIO::Util.unpack(stream.read(SIZE_T))
         end
 
         # Pack +val+ into {Type::SIZE_T} bytes and write to +stream+.
         #
         # @param [#write] stream
+        #   Stream to write.
         # @param [Integer] val
+        #   Value to be written.
         #
         # @return [void]
         #
@@ -46,12 +47,15 @@ module MemoryIO
 
         # Yield a block and resume the position of stream.
         #
+        # @param [#pos, #pos=] stream
+        #   Stream.
         # @param [Integer] pos
-        #   Move +stream+'s pos to +pos+ before invoke the block.
+        #   Move +stream+'s position to +pos+ before invoke the block.
         #
-        # @yieldparam [#read] stream
-        #
+        # @yieldparam [#pos, #pos=] stream
+        #   Same as parameter +stream+.
         # @yieldreturn [Object]
+        #   The returned object will be returned by this method.
         #
         # @return [Object]
         #   Returns the object returned by block.
@@ -79,6 +83,8 @@ module MemoryIO
         #
         # @return [{Symbol => Object}]
         #   The object that registered in {.register}.
+        #
+        # @see .register
         def find(symbol)
           @map[symbol]
         end
@@ -89,13 +95,12 @@ module MemoryIO
         #   Normally, +object+ is a descendent class of {Type}.
         #
         # @option [Symbol, Array<Symbol>] alias
-        #   Custom symbol name that can be used in {.find}.
+        #   Custom symbol name(s) that can be used in {.find}.
         # @option [String] doc
         #   Doc string that will be shown in README.md.
         #
         # @return [Array<Symbol>]
         #   Array of symbols that can be used for finding the registered object.
-        #   See {.find}.
         #
         # @example
         #   Type.register(MemoryIO::Types::Clang::CStr, alias: :meow)
@@ -119,7 +124,7 @@ module MemoryIO
           @map ||= OpenStruct.new
           aliases = Array(option[:alias])
           reg_fail = ArgumentError.new(<<-EOS.strip)
-Register '#{object.inspect}' fails because other objects with same name has been registered.
+Register '#{object.inspect}' fails because another object with same name has been registered.
 Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
           EOS
           raise reg_fail if aliases.any? && aliases.all? { |ali| @map[ali] }

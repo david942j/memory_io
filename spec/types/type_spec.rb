@@ -31,7 +31,7 @@ describe MemoryIO::Types::Type do
     syms = described_class.register(MemoryIO::Types::MyModule::MyClass, alias: :meow)
     expect(syms).to eq %i[my_module/my_class my_class meow]
     expect { described_class.register(String, alias: :meow) }.to raise_error(ArgumentError, <<-EOS.strip)
-Register 'String' fails because other objects with same name has been registered.
+Register 'String' fails because another object with same name has been registered.
 Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
     EOS
     syms = described_class.register(MemoryIO::Types::MyModule::MyClass, alias: %i[meow meow2])

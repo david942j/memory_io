@@ -38,12 +38,14 @@ Therefore, **Pull Requests of adding new structures** are welcome :D
 
 ## Implemented Structures
 
-Following is list of supported structures.
-Each type has a full-name and an alias, for example,
+Following is the list of supported structures.
+Each type has a full-name and an alias. For example,
 
 ```ruby
+require 'memory_io'
+
 process = MemoryIO.attach(`pidof victim`.to_i)
-# read a 64-bits unsigned integer
+# read a 64-bit unsigned integer
 process.read(0x601000, 1, as: 'basic/u64')
 # is equivalent to
 process.read(0x601000, 1, as: :u64)

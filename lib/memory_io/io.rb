@@ -5,11 +5,11 @@ require 'memory_io/types/types'
 module MemoryIO
   # Main class to use {MemoryIO}.
   class IO
-    attr_reader :stream # @return [#pos=, #read, #write]
+    attr_reader :stream # @return [#pos, #pos=, #read, #write]
 
     # Instantiate an {IO} object.
     #
-    # @param [#pos=, #read, #write] stream
+    # @param [#pos, #pos=, #read, #write] stream
     #   The file-like object to be read/written.
     #   +file+ can be unwritable if you will not invoke any write-related method.
     #
@@ -124,7 +124,7 @@ module MemoryIO
     #   A +Proc+ is allowed, which should accept +stream+ and one object as arguments.
     #
     #   If +objects+ is a descendent instance of {Types::Type} and +as+ is +nil,
-    #   +objects.class+ will be used as +as+.
+    #   +objects.class+ will be used for +as+.
     #   Otherwise, when +as = nil+, this method will simply call +stream.write(objects)+.
     #
     # @return [void]

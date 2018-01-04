@@ -10,7 +10,7 @@ module MemoryIO
       attr_reader :obj
 
       # @return [Array<Symbol>]
-      #   All symols that can find this record in {Type.find}.
+      #   All symbols that can find this record in {Type.find}.
       attr_reader :keys
 
       # Instantiate a {Record} object.
@@ -19,8 +19,10 @@ module MemoryIO
       # @param [Array<Symbol>] keys
       #
       # @option [Thread::Backtrace::Location] caller
-      #   This option should present if and only if +object+ is a subclass of {Types::Type}
+      #   This option should present if and only if +object+ is a subclass of {Types::Type}.
       # @option [String] doc
+      #   Docstring.
+      #   Automatically parse from caller location if this parameter isn't present.
       def initialize(object, keys, option = {})
         @obj = object
         @keys = keys
@@ -31,7 +33,7 @@ module MemoryIO
       # Get the doc string.
       #
       # @return [String]
-      #   If option +doc+ had been passed in {#initialize}, this method simple returns it.
+      #   If option +doc+ had been passed in {#initialize}, this method simply returns it.
       #   Otherwise, parse the file for inline-docs.
       #   If neither +doc+ nor +caller+ had been passed to {#initialize}, an empty string is returned.
       def doc
