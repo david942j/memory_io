@@ -28,7 +28,7 @@ The std::string class can be seen as:
       size_t allocated_capacity;
     }
   };
-EOS
+    EOS
   end
 
   it :inspect do
