@@ -128,8 +128,10 @@ Register '#{object.inspect}' fails because another object with same name has bee
 Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
           EOS
           raise reg_fail if aliases.any? && aliases.all? { |ali| @map[ali] }
+
           keys = get_keys(object).concat(aliases).uniq.reject { |k| @map[k] }
           raise reg_fail if keys.empty?
+
           rec = MemoryIO::Types::Record.new(object, keys, option)
           keys.each { |k| @map[k] = rec }
         end
@@ -156,6 +158,7 @@ Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
         # @return [Array<Symbol>]
         def get_keys(klass)
           return [] unless klass.instance_of?(Class)
+
           snake = MemoryIO::Util.underscore(klass.name)
           snake.gsub!(%r[^memory_io/types/], '')
           ret = [snake]

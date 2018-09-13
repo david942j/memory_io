@@ -102,6 +102,7 @@ module MemoryIO
     def read(num_elements, from: nil, as: nil, force_array: false)
       stream.pos = from if from
       return stream.read(num_elements) if as.nil?
+
       conv = to_proc(as, :read)
       # TODO: handle eof
       ret = Array.new(num_elements) { conv.call(stream) }
@@ -163,6 +164,7 @@ module MemoryIO
       stream.pos = from if from
       as ||= objects.class if objects.class.ancestors.include?(MemoryIO::Types::Type)
       return stream.write(objects) if as.nil?
+
       conv = to_proc(as, :write)
       Array(objects).map { |o| conv.call(stream, o) }
     end
@@ -182,6 +184,7 @@ module MemoryIO
       ret = as.respond_to?(rw) ? as.method(rw) : as
       ret = ret.respond_to?(:call) ? ret : MemoryIO::Types.get_proc(ret, rw)
       raise ArgumentError, <<-EOERR.strip unless ret.respond_to?(:call)
+
 Invalid argument `as`: #{as.inspect}. It should be either a Proc or a supported type of MemoryIO::Types.
       EOERR
       ret

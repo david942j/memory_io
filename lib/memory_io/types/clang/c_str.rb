@@ -19,6 +19,7 @@ module MemoryIO
           loop do
             c = stream.read(1)
             break if c.nil? || c == '' || c == "\x00"
+
             ret << c
           end
           ret

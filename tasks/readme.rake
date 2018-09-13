@@ -1,14 +1,16 @@
 desc 'To auto generate README.md from README.tpl'
 task :readme do
   next if ENV['CI']
+
   require 'memory_io'
   @tpl = IO.binread('README.tpl')
 
   # Generate implemented structures list
   module Impl
     module_function
+
     def type_map
-      @map ||= MemoryIO::Types::Type.instance_variable_get(:@map)
+      @type_map ||= MemoryIO::Types::Type.instance_variable_get(:@map)
     end
 
     def type_map_h
@@ -34,16 +36,19 @@ task :readme do
     def custom_sort(ary)
       ary.sort do |x, y|
         next x <=> y if x.first != y.first || x.first != 'basic'
+
         order = %w[u s f d]
         a = order.index(x.last[0])
         b = order.index(y.last[0])
         next a <=> b if a != b
+
         x.last[1..-1].to_i <=> y.last[1..-1].to_i
       end
     end
 
     def gen
       raise if compl_keys.map(&:size).uniq != [2]
+
       out = StringIO.new
       last_scope = ''
       compl_keys.each do |skey|

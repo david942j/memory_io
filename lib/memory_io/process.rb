@@ -26,6 +26,7 @@ module MemoryIO
       @perm = MemoryIO::Util.file_permission(@mem)
       # TODO: raise custom exception
       raise Errno::ENOENT, @mem if perm.nil?
+
       # FIXME: use logger
       warn(<<-EOS.strip) unless perm.readable? || perm.writable?
 You have no permission to read/write this process.
@@ -60,10 +61,12 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       file = "/proc/#{@pid}/maps"
       stat = MemoryIO::Util.file_permission(file)
       return {} unless stat && stat.readable?
+
       maps = ::IO.binread(file).split("\n").map do |line|
         # 7f76515cf000-7f76515da000 r-xp 00000000 fd:01 29360257  /lib/x86_64-linux-gnu/libnss_files-2.24.so
         addr, _perm, _offset, _dev, _inode, pathname = line.strip.split(' ', 6)
         next nil if pathname.nil?
+
         addr = addr.to_i(16)
         pathname = pathname[1..-2] if pathname =~ /^\[.+\]$/
         pathname = ::File.basename(pathname)

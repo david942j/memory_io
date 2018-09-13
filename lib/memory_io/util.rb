@@ -24,6 +24,7 @@ module MemoryIO
     #   #=> 'my_module/my_class'
     def underscore(str)
       return '' if str.empty?
+
       str = str.gsub('::', '/')
       str.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
       str.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
@@ -41,6 +42,7 @@ module MemoryIO
     #   +nil+ for file not exists or is inaccessible.
     def file_permission(file)
       return nil unless File.file?(file)
+
       stat = File.stat(file)
       # we do a trick here because /proc/[pid]/mem might be marked as readable but fails at sysopen.
       os = OpenStruct.new(readable?: stat.readable_real?, writable?: stat.writable_real?)
@@ -72,6 +74,7 @@ module MemoryIO
     #   #=> 56960 # 0xde80
     def safe_eval(str, **vars)
       return str if str.is_a?(Integer)
+
       # dentaku 2 doesn't support hex
       str = str.gsub(/0x[0-9a-zA-Z]+/) { |c| c.to_i(16) }
       Dentaku::Calculator.new.store(vars).evaluate(str)
