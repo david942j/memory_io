@@ -39,6 +39,7 @@ module MemoryIO
       def doc
         return @force_doc if @force_doc
         return '' unless @caller
+
         parse_file_doc(@caller.absolute_path, @caller.lineno)
       end
 
@@ -47,13 +48,16 @@ module MemoryIO
       # @return [String]
       def parse_file_doc(file, lineno)
         return '' unless ::File.file?(file)
+
         strings = []
         lines = ::IO.binread(file).split("\n")
         (lineno - 1).downto(1) do |no|
           str = lines[no - 1]
           break if str.nil?
+
           str.strip!
           break unless str.start_with?('#')
+
           strings.unshift(str[2..-1] || '')
         end
         trim_docstring(strings)
