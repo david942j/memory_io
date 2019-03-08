@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.date          = Date.today.to_s
   s.summary       = 'memory_io'
   s.description   = <<-EOS
+Read/Write complicated structures in memory easily.
   EOS
   s.license       = 'MIT'
   s.authors       = ['david942j']

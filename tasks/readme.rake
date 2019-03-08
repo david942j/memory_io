@@ -3,7 +3,7 @@ task :readme do
   next if ENV['CI']
 
   require 'memory_io'
-  @tpl = IO.binread('README.tpl')
+  @tpl = IO.binread('README.tpl.md')
 
   # Generate implemented structures list
   module Impl
