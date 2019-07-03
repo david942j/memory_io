@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'memory_io/types/type'
 require 'memory_io/util'
 
@@ -53,7 +55,7 @@ module MemoryIO
     #   #=> #<Method: MemoryIO::Types::Number#read>
     def get_proc(name, rw)
       klass = find(name)
-      klass && klass.method(rw)
+      klass&.method(rw)
     end
   end
 end

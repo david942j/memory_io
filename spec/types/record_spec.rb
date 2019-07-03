@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'memory_io/types/record'
 
 describe MemoryIO::Types::Record do

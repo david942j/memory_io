@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MemoryIO
   # Records information of a process.
   class Process
@@ -60,7 +62,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     def bases
       file = "/proc/#{@pid}/maps"
       stat = MemoryIO::Util.file_permission(file)
-      return {} unless stat && stat.readable?
+      return {} unless stat&.readable?
 
       maps = ::IO.binread(file).split("\n").map do |line|
         # 7f76515cf000-7f76515da000 r-xp 00000000 fd:01 29360257  /lib/x86_64-linux-gnu/libnss_files-2.24.so
