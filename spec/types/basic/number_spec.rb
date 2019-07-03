@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'memory_io/types/basic/number'
 require 'memory_io/types/types'
 
@@ -32,7 +34,7 @@ describe MemoryIO::Types::Basic::Number do
       stream = StringIO.new
       MemoryIO::Types.find(:u64).write(stream, 0xdeadbeef12345678)
       expect(stream.string).to eq "\x78\x56\x34\x12\xef\xbe\xad\xde"
-      stream.string = ''
+      stream.string = +''
       MemoryIO::Types.find(:s64).write(stream, -0x21524110edcba988)
       expect(stream.string).to eq "\x78\x56\x34\x12\xef\xbe\xad\xde"
     end
@@ -41,7 +43,7 @@ describe MemoryIO::Types::Basic::Number do
       stream = StringIO.new
       MemoryIO::Types.find(:float).write(stream, -0.123)
       expect(stream.string).to eq "m\xE7\xFB\xBD"
-      stream.string = ''
+      stream.string = +''
       MemoryIO::Types.find(:double).write(stream, -0.123)
       expect(stream.string).to eq "\xB0rh\x91\xED|\xBF\xBF"
     end

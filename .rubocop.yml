@@ -33,9 +33,6 @@ Naming/HeredocDelimiterNaming:
 Naming/UncommunicativeMethodParamName:
   Enabled: false
 
-Rails:
-  Enabled: false
-
 Style/FormatStringToken:
   Enabled: false
 

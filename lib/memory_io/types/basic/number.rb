@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'memory_io/types/type'
 
 module MemoryIO
@@ -6,7 +8,7 @@ module MemoryIO
     module Basic
       # Register numbers to {Types}.
       #
-      # All types registerd by this class are assumed as *little endian*.
+      # All types registered by this class are assumed as *little endian*.
       #
       # This class registered (un)signed {8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
       class Number

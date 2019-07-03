@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+# frozen_string_literal: true
 
 require 'memory_io/types/type'
 
@@ -15,7 +16,7 @@ module MemoryIO
         # @return [String]
         #   String without null byte.
         def self.read(stream)
-          ret = ''
+          ret = +''
           loop do
             c = stream.read(1)
             break if c.nil? || c == '' || c == "\x00"
@@ -31,7 +32,7 @@ module MemoryIO
         #   A null byte would be appended if +val+ not ends with null byte.
         def self.write(stream, val)
           val = val.to_s
-          val << "\x00" unless val.end_with?("\x00")
+          val += "\x00" unless val.end_with?("\x00")
           stream.write(val)
         end
       end

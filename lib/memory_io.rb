@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # MemoryIO - Read/Write structures in memory.
 #
 # @author david942j
