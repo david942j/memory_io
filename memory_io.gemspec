@@ -23,7 +23,7 @@ Read/Write complicated structures in memory easily.
 
   s.add_runtime_dependency 'dentaku', '>= 2.0.11'
 
-  s.add_development_dependency 'rake', '~> 12.0'
+  s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.5'
   s.add_development_dependency 'rubocop', '~> 0.59'
   s.add_development_dependency 'simplecov', '~> 0.17'
