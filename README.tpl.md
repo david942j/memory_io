@@ -17,9 +17,9 @@ However, gdb doesn't support writing Ruby scripts
 (unless you use [gdb-ruby](https://github.com/david942j/gdb-ruby), which has dependency of **MemoryIO**).
 So I create this repo and want to make the debug procedure much easier.
 
-This repo has two main targets:
+This repository has two main goals:
 
-1. To communiate with memory easily.
+1. To communicate with memory easily.
 2. To collect all common structures for debugging/learning.
 
 ## Why
@@ -51,7 +51,7 @@ process.read(0x601000, 1, as: 'basic/u64')
 process.read(0x601000, 1, as: :u64)
 ```
 
-Goto [the online document](http://www.rubydoc.info/github/david942j/memory_io/master/MemoryIO/Types) for more details
+Go to [the online document](http://www.rubydoc.info/github/david942j/memory_io/master/MemoryIO/Types) for more details
 of each type.
 IMPLEMENTED_STRUCTURES
 
