@@ -18,6 +18,7 @@ module MemoryIO
       #     }
       #   };
       class String < MemoryIO::Types::Type
+
         # std::string uses inlined-buffer if string length isn't larger than {LOCAL_CAPACITY}.
         LOCAL_CAPACITY = 15
 

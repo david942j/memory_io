@@ -41,7 +41,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     process = described_class.new('self')
     was = process.read('ruby+0', 4)
     process.write('ruby + 0', 'ABCD')
-    expect(process.read('ruby+0', 4)).to eq "ABCD"
+    expect(process.read('ruby+0', 4)).to eq 'ABCD'
     process.write('ruby + 0', was)
     next unless before_2_7
 
