@@ -1,18 +1,17 @@
 language: ruby
-sudo: required
 cache: bundler
 os:
   - linux
 rvm:
-  - 2.3
   - 2.4
   - 2.5
   - 2.6
+  - 2.7
   - ruby-head
 branches:
   only:
     - master
-matrix:
+jobs:
   allow_failures:
     - rvm: ruby-head
 before_install:
@@ -23,7 +22,5 @@ before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
-script:
-  - bundle exec rake
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

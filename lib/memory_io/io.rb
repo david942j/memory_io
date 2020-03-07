@@ -188,6 +188,7 @@ module MemoryIO
 
 Invalid argument `as`: #{as.inspect}. It should be either a Proc or a supported type of MemoryIO::Types.
       EOERR
+
       ret
     end
   end
