@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
 desc 'To auto generate README.md from README.tpl'
 task :readme do
   next if ENV['CI']
 
   require 'memory_io'
+  require 'stringio'
+
   @tpl = IO.binread('README.tpl.md')
 
   # Generate implemented structures list

@@ -11,6 +11,7 @@ module MemoryIO
     module Clang
       # A null-terminated string.
       class CStr < Types::Type
+
         # @api private
         #
         # @return [String]

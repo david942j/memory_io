@@ -12,14 +12,14 @@ module MemoryIO
     #
     # @param [#pos, #pos=, #read, #write] stream
     #   The file-like object to be read/written.
-    #   +file+ can be unwritable if you will not invoke any write-related method.
+    #   +file+ can be un-writable if you will not invoke any write-related method.
     #
     #   If +stream.read(*)+ returns empty string or +nil+, it would be seen as reaching EOF.
     def initialize(stream)
       @stream = stream
     end
 
-    # Read and convert result into custom type/stucture.
+    # Read and convert result into custom type/structure.
     #
     # @param [Integer] num_elements
     #   Number of elements to be read.
@@ -44,7 +44,7 @@ module MemoryIO
     #
     # @return [String, Object, Array<Object>]
     #   There're multiple possible return types,
-    #   which dependes on the value of parameter +num_elements+, +as+, and +force_array+.
+    #   which depends on the value of parameter +num_elements+, +as+, and +force_array+.
     #
     #   See examples for clear usage. The rule of return type is listed as following:
     #
@@ -125,7 +125,7 @@ module MemoryIO
     #
     #   A +Proc+ is allowed, which should accept +stream+ and one object as arguments.
     #
-    #   If +objects+ is a descendent instance of {Types::Type} and +as+ is +nil,
+    #   If +objects+ is a descendant instance of {Types::Type} and +as+ is +nil,
     #   +objects.class+ will be used for +as+.
     #   Otherwise, when +as = nil+, this method will simply call +stream.write(objects)+.
     #
@@ -188,6 +188,7 @@ module MemoryIO
 
 Invalid argument `as`: #{as.inspect}. It should be either a Proc or a supported type of MemoryIO::Types.
       EOERR
+
       ret
     end
   end

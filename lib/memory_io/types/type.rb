@@ -7,7 +7,7 @@ require 'memory_io/util'
 
 module MemoryIO
   module Types
-    # The base class, all descendents of this class would be consider as a valid 'type'.
+    # The base class, all descendants of this class would be consider as a valid 'type'.
     class Type
       # The size of +size_t+. i.e. +sizeof(size_t)+.
       SIZE_T = 8
@@ -94,7 +94,7 @@ module MemoryIO
         # Register a new type.
         #
         # @param [#read, #write] object
-        #   Normally, +object+ is a descendent class of {Type}.
+        #   Normally, +object+ is a descendant class of {Type}.
         #
         # @option [Symbol, Array<Symbol>] alias
         #   Custom symbol name(s) that can be used in {.find}.

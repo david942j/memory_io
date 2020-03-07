@@ -3,7 +3,7 @@
 require 'memory_io/types/type'
 require 'memory_io/util'
 
-Dir.glob(File.join(__dir__, '**', '*.rb')) { |f| require f unless f == __FILE__ }
+Dir.glob(File.join(__dir__, '**', '*.rb')).sort.each { |f| require f unless f == __FILE__ }
 
 module MemoryIO
   # Module that includes multiple types.
