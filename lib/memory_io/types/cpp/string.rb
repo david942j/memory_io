@@ -22,9 +22,7 @@ module MemoryIO
         # std::string uses inlined-buffer if string length isn't larger than {LOCAL_CAPACITY}.
         LOCAL_CAPACITY = 15
 
-        attr_reader :data # @return [::String]
-        attr_reader :capacity # @return [Integer]
-        attr_reader :dataplus # @return [Integer]
+        attr_reader :data, :capacity, :dataplus # @return [::String] # @return [Integer] # @return [Integer]
 
         # Instantiate a {CPP::String} object.
         #
@@ -33,6 +31,7 @@ module MemoryIO
         # @param [Integer] dataplus
         #   A pointer.
         def initialize(data, capacity, dataplus)
+          super()
           @data = data
           @capacity = capacity
           @dataplus = dataplus
@@ -109,10 +108,10 @@ module MemoryIO
             write_size_t(stream, obj.length)
             pos = stream.pos
             if obj.length > LOCAL_CAPACITY
-              keep_pos(stream, pos: obj.dataplus) { |s| s.write(obj.data + "\x00") }
+              keep_pos(stream, pos: obj.dataplus) { |s| s.write("#{obj.data}\u0000") }
               write_size_t(stream, obj.capacity)
             else
-              stream.write(obj.data + "\x00")
+              stream.write("#{obj.data}\u0000")
             end
             stream.pos = pos + LOCAL_CAPACITY + 1
           end

@@ -50,7 +50,7 @@ The std::string class can be seen as:
   it :write do
     s = StringIO.new
     MemoryIO::IO.new(s).write(described_class.new('meow', 15, 16))
-    expect(s.string).to eq "\x10" + "\x00" * 7 + "\x04" + "\x00" * 7 + "meow\x00"
+    expect(s.string).to eq "\u0010#{"\x00" * 7}\u0004#{"\x00" * 7}meow\u0000"
     expect(s.pos).to eq 32
     @launch.call do |i, o, process|
       _, _, addr = Array.new(3) { o.gets.to_i(16) }
@@ -59,7 +59,7 @@ The std::string class can be seen as:
       string.data = 'A' * 26
       process.write(addr, string)
       i.puts
-      expect(o.gets).to eq 'A' * 26 + "\n"
+      expect(o.gets).to eq "#{'A' * 26}\n"
       string = process.read(addr, 1, as: :'cpp/string')
       expect(string.data).to eq 'A' * 26
     end

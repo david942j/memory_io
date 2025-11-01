@@ -9,8 +9,7 @@ require 'memory_io/version'
 
 Gem::Specification.new do |s|
   s.name          = 'memory_io'
-  s.version       = ::MemoryIO::VERSION
-  s.date          = Date.today.to_s
+  s.version       = MemoryIO::VERSION
   s.summary       = 'memory_io'
   s.description   = <<-EOS
 Read/Write complicated structures in memory easily.
@@ -31,4 +30,5 @@ Read/Write complicated structures in memory easily.
   s.add_development_dependency 'rubocop', '~> 1'
   s.add_development_dependency 'simplecov', '~> 0.22'
   s.add_development_dependency 'yard', '~> 0.9'
+  s.metadata['rubygems_mfa_required'] = 'true'
 end

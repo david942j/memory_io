@@ -37,8 +37,8 @@ module MemoryIO
         private
 
         def unpack(str)
-          val = str.unpack(@pack_str).first
-          val -= (2**(@bytes * 8)) if @signed && val >= (2**(@bytes * 8 - 1))
+          val = str.unpack1(@pack_str)
+          val -= (2**(@bytes * 8)) if @signed && val >= (2**((@bytes * 8) - 1))
           val
         end
 

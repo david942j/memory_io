@@ -1,6 +1,10 @@
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
+  NewCops: enable
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
 
 Layout/EmptyLinesAroundClassBody:
   Enabled: false

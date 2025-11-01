@@ -60,14 +60,14 @@ module MemoryIO
           str.strip!
           break unless str.start_with?('#')
 
-          strings.unshift(str[2..-1] || '')
+          strings.unshift(str[2..] || '')
         end
         trim_docstring(strings)
       end
 
       def trim_docstring(strings)
         strings = strings.drop_while { |s| s.start_with?('@') }.take_while { |s| !s.start_with?('@') }
-        strings.drop_while(&:empty?).reverse.drop_while(&:empty?).reverse.join("\n") + "\n"
+        "#{strings.drop_while(&:empty?).reverse.drop_while(&:empty?).reverse.join("\n")}\n"
       end
     end
   end

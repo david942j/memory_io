@@ -97,7 +97,7 @@ module MemoryIO
     #   Util.unpack("@\xE2\x01\x00")
     #   #=> 123456
     def unpack(str)
-      str.bytes.reverse.reduce(0) { |s, c| s * 256 + c }
+      str.bytes.reverse.reduce(0) { |s, c| (s * 256) + c }
     end
 
     # Pack an integer into +b+ bytes.
