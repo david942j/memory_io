@@ -23,8 +23,8 @@ module MemoryIO
       # @option [Thread::Backtrace::Location] caller
       #   This option should present if and only if +object+ is a subclass of {Types::Type}.
       # @option [String] doc
-      #   Docstring.
-      #   Automatically parse from caller location if this parameter isn't present.
+      #   Doc-string.
+      #   Automatically parse from caller location if this parameter doesn't present.
       def initialize(object, keys, option = {})
         @obj = object
         @keys = keys

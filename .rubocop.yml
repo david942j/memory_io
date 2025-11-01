@@ -65,6 +65,11 @@ Style/HashTransformValues:
 Style/MixinUsage:
   Enabled: false
 
+Style/OpenStructUse:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+
 Style/PercentLiteralDelimiters:
   Enabled: false
 

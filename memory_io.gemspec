@@ -22,9 +22,9 @@ Read/Write complicated structures in memory easily.
 
   s.required_ruby_version = '>= 3.2'
 
-  s.add_dependency 'dentaku', '>= 2.0.11'
-  s.add_dependency 'ostruct', '>= 0.6'
+  s.add_dependency 'dentaku', '~> 3'
 
+  s.add_development_dependency 'ostruct', '>= 0.6'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.5'
   s.add_development_dependency 'rubocop', '~> 1'

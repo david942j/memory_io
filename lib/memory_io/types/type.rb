@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'ostruct'
-
 require 'memory_io/types/record'
 require 'memory_io/util'
 
@@ -123,7 +121,7 @@ module MemoryIO
         #
         # @see .find
         def register(object, option = {})
-          @map ||= OpenStruct.new
+          @map ||= {}
           aliases = Array(option[:alias])
           reg_fail = ArgumentError.new(<<-EOS.strip)
 Register '#{object.inspect}' fails because another object with same name has been registered.
