@@ -60,11 +60,13 @@ module MemoryIO
         # @todo
         #   Let it be colorful in pry.
         def inspect
+          # rubocop:disable Lint/FormatParameterMismatch
           format("#<%s @data=%s, @capacity=%d, @dataplus=0x%0#{SIZE_T * 2}x>",
                  self.class.name,
                  data.inspect,
                  capacity,
                  dataplus)
+          # rubocop:enable Lint/FormatParameterMismatch
         end
 
         class << self

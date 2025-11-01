@@ -152,6 +152,7 @@ Specify an alias such as `register(MyClass, alias: :custom_alias_name)`.
         #
         # To record descendants.
         def inherited(klass)
+          super
           register(klass, caller: caller_locations(1, 1).first)
         end
 

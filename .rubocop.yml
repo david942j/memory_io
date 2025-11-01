@@ -19,6 +19,16 @@ Layout/LineLength:
   Enabled: true
   Max: 120
 
+Lint/ConstantDefinitionInBlock:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+
+Lint/EmptyClass:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+
 Metrics/AbcSize:
   Enabled: false
 
