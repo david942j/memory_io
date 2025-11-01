@@ -21,13 +21,14 @@ Read/Write complicated structures in memory easily.
   s.files         = Dir['lib/**/*.rb'] + %w(README.md)
   s.homepage      = 'https://github.com/david942j/memory_io'
 
-  s.required_ruby_version = '>= 2.3'
+  s.required_ruby_version = '>= 3.2'
 
-  s.add_runtime_dependency 'dentaku', '>= 2.0.11'
+  s.add_dependency 'dentaku', '>= 2.0.11'
+  s.add_dependency 'ostruct', '>= 0.6'
 
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.5'
-  s.add_development_dependency 'rubocop', '~> 0.59'
-  s.add_development_dependency 'simplecov', '~> 0.17'
+  s.add_development_dependency 'rubocop', '~> 1'
+  s.add_development_dependency 'simplecov', '~> 0.22'
   s.add_development_dependency 'yard', '~> 0.9'
 end
