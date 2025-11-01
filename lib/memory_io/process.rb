@@ -16,11 +16,6 @@ module MemoryIO
     #
     # @note
     #   This class only supports procfs-based system. i.e. /proc is mounted and readable.
-    #
-    # @todo
-    #   Support MacOS
-    # @todo
-    #   Support Windows
     def initialize(pid)
       @pid = pid
       @mem = "/proc/#{pid}/mem"
