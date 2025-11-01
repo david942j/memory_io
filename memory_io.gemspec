@@ -3,8 +3,6 @@
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'date'
-
 require 'memory_io/version'
 
 Gem::Specification.new do |s|
@@ -17,8 +15,9 @@ Read/Write complicated structures in memory easily.
   s.license       = 'MIT'
   s.authors       = ['david942j']
   s.email         = ['david942j@gmail.com']
-  s.files         = Dir['lib/**/*.rb'] + %w(README.md)
+  s.files         = Dir['lib/**/*.rb'] + %w(README.md LICENSE)
   s.homepage      = 'https://github.com/david942j/memory_io'
+  s.metadata['rubygems_mfa_required'] = 'true'
 
   s.required_ruby_version = '>= 3.2'
 
@@ -30,5 +29,4 @@ Read/Write complicated structures in memory easily.
   s.add_development_dependency 'rubocop', '~> 1'
   s.add_development_dependency 'simplecov', '~> 0.22'
   s.add_development_dependency 'yard', '~> 0.9'
-  s.metadata['rubygems_mfa_required'] = 'true'
 end
