@@ -37,5 +37,9 @@ describe MemoryIO::Util do
     expect(described_class.trim_libname('libcrypto.so.1.0.0')).to eq 'libcrypto'
     expect(described_class.trim_libname('not_a_so')).to eq 'not_a_so'
     expect(described_class.trim_libname('cat.socat')).to eq 'cat.socat'
+    expect(described_class.trim_libname('libc.so.6')).to eq 'libc'
+    expect(described_class.trim_libname('libm.so.6')).to eq 'libm'
+    expect(described_class.trim_libname('libgcc_s.so.1')).to eq 'libgcc_s'
+    expect(described_class.trim_libname('ld-linux-x86-64.so.2')).to eq 'ld'
   end
 end

@@ -145,9 +145,13 @@ module MemoryIO
     #   #=> 'libcrypto'
     #   Util.trim_libname('not_a_so')
     #   #=> 'not_a_so'
+    #   Util.trim_libname('ld-linux-x86-64.so.2')
+    #   #=> 'ld'
     def trim_libname(name)
+      return 'ld' if name.start_with?('ld-')
+
       type1 = '(-[\d.]+)?\.so$'
-      type2 = '\.so.\d+[\d.]+$'
+      type2 = '\.so.[\.\d]+$'
       name.sub(/#{type1}|#{type2}/, '')
     end
   end
