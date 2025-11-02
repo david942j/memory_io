@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  actions: write
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        ruby-version: ['3.2', '3.3', '3.4', head]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Run tests
+      run: bundle exec rake
+    - name: Publish code coverage
+      if: ${{ success() && runner.os == 'Linux' }}
+      uses: qltysh/qlty-action/coverage@v1
+      with:
+        oidc: true
+        files: coverage/coverage.json

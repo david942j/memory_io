@@ -7,7 +7,7 @@ task :readme do
   require 'memory_io'
   require 'stringio'
 
-  @tpl = IO.binread('README.tpl.md')
+  @tpl = File.binread('README.tpl.md')
 
   # Generate implemented structures list
   module Impl
@@ -46,7 +46,7 @@ task :readme do
         b = order.index(y.last[0])
         next a <=> b if a != b
 
-        x.last[1..-1].to_i <=> y.last[1..-1].to_i
+        x.last[1..].to_i <=> y.last[1..].to_i
       end
     end
 
@@ -70,5 +70,5 @@ task :readme do
   end
   @tpl.gsub!('IMPLEMENTED_STRUCTURES', Impl.gen)
 
-  IO.binwrite('README.md', @tpl)
+  File.binwrite('README.md', @tpl)
 end

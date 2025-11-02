@@ -1,6 +1,10 @@
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
+  NewCops: enable
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
 
 Layout/EmptyLinesAroundClassBody:
   Enabled: false
@@ -14,6 +18,16 @@ Layout/HeredocIndentation:
 Layout/LineLength:
   Enabled: true
   Max: 120
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+
+Lint/EmptyClass:
+  Enabled: true
+  Exclude:
+    - spec/**/*
 
 Metrics/AbcSize:
   Enabled: false
@@ -50,6 +64,11 @@ Style/HashTransformValues:
 
 Style/MixinUsage:
   Enabled: false
+
+Style/OpenStructUse:
+  Enabled: true
+  Exclude:
+    - spec/**/*
 
 Style/PercentLiteralDelimiters:
   Enabled: false

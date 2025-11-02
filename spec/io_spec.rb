@@ -28,7 +28,7 @@ describe MemoryIO::IO do
       expect(io.read(2, as: :u64)).to eq [0x4242424241414141, 0xdeadbeef]
       expect(io.read(1, from: 0, as: :u64, force_array: true)).to eq [0x4242424241414141]
       expect(io.read(1, from: 8, as: :u32)).to eq 0xdeadbeef
-      expect(io.read(1, from: 8, as: :s32)).to eq 0xdeadbeef - 2**32
+      expect(io.read(1, from: 8, as: :s32)).to eq 0xdeadbeef - (2**32)
 
       io = @get_io.call("123\x0045678\x00")
       expect(io.read(2, as: :c_str)).to eq %w[123 45678]

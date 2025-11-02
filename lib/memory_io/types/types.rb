@@ -3,7 +3,7 @@
 require 'memory_io/types/type'
 require 'memory_io/util'
 
-Dir.glob(File.join(__dir__, '**', '*.rb')).sort.each { |f| require f unless f == __FILE__ }
+Dir.glob(File.join(__dir__, '**', '*.rb')).each { |f| require f unless f == __FILE__ }
 
 module MemoryIO
   # Module that includes multiple types.
@@ -33,7 +33,7 @@ module MemoryIO
     #   #=> #<MemoryIO::Types::Number:0x000055ecc017a310 @bytes=8, @pack_str="Q", @signed=false>
     def find(name)
       obj = Types::Type.find(name)
-      return obj.obj if obj
+      obj&.obj
     end
 
     # @api private

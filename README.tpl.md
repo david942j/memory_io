@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/david942j/memory_io.svg?branch=master)](https://travis-ci.org/david942j/memory_io)
 [![Gem Version](https://badge.fury.io/rb/memory_io.svg)](https://badge.fury.io/rb/memory_io)
-[![Maintainability](https://api.codeclimate.com/v1/badges/dc8da34c5a8ab0095530/maintainability)](https://codeclimate.com/github/david942j/memory_io/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/dc8da34c5a8ab0095530/test_coverage)](https://codeclimate.com/github/david942j/memory_io/test_coverage)
-[![Inline docs](https://inch-ci.org/github/david942j/memory_io.svg?branch=master)](https://inch-ci.org/github/david942j/memory_io)
+[![Build Status](https://github.com/david942j/memory_io/workflows/build/badge.svg)](https://github.com/david942j/memory_io/actions)
+[![Maintainability](https://qlty.sh/gh/david942j/projects/memory_io/maintainability.svg)](https://qlty.sh/gh/david942j/projects/memory_io)
+[![Code Coverage](https://qlty.sh/gh/david942j/projects/memory_io/coverage.svg)](https://qlty.sh/gh/david942j/projects/memory_io)
+[![Yard Docs](http://img.shields.io/badge/yard-docs-blue.svg)](https://www.rubydoc.info/github/david942j/memory_io/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 
 # MemoryIO
@@ -14,8 +14,8 @@ Read/Write complicated structures in memory easily.
 I usually need to dump a structure, say `string` in C++, from memory for debugging.
 This is not hard if using gdb.
 However, gdb doesn't support writing Ruby scripts
-(unless you use [gdb-ruby](https://github.com/david942j/gdb-ruby), which has dependency of **MemoryIO**).
-So I create this repo and want to make the debug procedure much easier.
+(unless you use [gdb-ruby](https://github.com/david942j/gdb-ruby), which has **MemoryIO** as its dependency).
+So I created this projected to make the debug procedure much easier.
 
 This repository has two main goals:
 
@@ -25,16 +25,14 @@ This repository has two main goals:
 ## Why
 
 It's not hard to read/write a process's memory (simply open the file `/proc/$PID/mem`),
-but it still worth to wrap it.
+but it's still worthy to make a utility.
 
-This repo also targets to collect all common structures, such as how to parse a C++/Rust/Python object from memory.
+This project also targets to collect all common structures, such as how to parse a C++/Rust/Python object from memory.
 Therefore, **Pull Requests of adding new structures** are welcome :D
 
 ## Supported Platform
 
 - Linux
-- (TODO) Windows
-- (TODO) MacOS
 
 ## Implemented Structures
 
@@ -104,7 +102,7 @@ string
 require 'memory_io'
 process = MemoryIO.attach(`pidof victim`.to_i)
 
-# An example that read a chunk of pt-malloc.
+# An example that reads a chunk of pt-malloc.
 read_chunk = lambda do |stream|
   _prev_size = stream.read(8)
   size = (stream.read(8).unpack('Q').first & -16) - 8

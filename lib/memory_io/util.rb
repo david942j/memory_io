@@ -1,11 +1,35 @@
 # frozen_string_literal: true
 
-require 'ostruct'
 require 'dentaku'
 
 module MemoryIO
   # Defines utility methods.
   module Util
+    # A simple class to be returned for getting file permissions.
+    class FilePermission
+      attr_reader :readable, :writable
+      # Alias the two methods to fit Ruby's method naming convention.
+      alias readable? readable
+      alias writable? writable
+
+      def initialize(file)
+        stat = File.stat(file)
+        @readable = stat.readable_real?
+        @writable = stat.writable_real?
+        # we do a trick here because /proc/[pid]/mem might be marked as writeable but fails at sysopen.
+        begin
+          @readable && File.open(file, 'rb').close
+        rescue Errno::EACCES
+          @readable = false
+        end
+        begin
+          @writable && File.open(file, 'wb').close
+        rescue Errno::EACCES
+          @writable = false
+        end
+      end
+    end
+
     module_function
 
     # Convert input into snake-case.
@@ -39,26 +63,12 @@ module MemoryIO
     # @param [String] file
     #   File name.
     #
-    # @return [#readable?, #writable?, nil]
-    #   Struct with two boolean method.
-    #   +nil+ for file not exists or is inaccessible.
+    # @return [MemoryIO::Util::FilePermission?]
+    #   +nil+ is returned if file does not exist or is inaccessible.
     def file_permission(file)
       return nil unless File.file?(file)
 
-      stat = File.stat(file)
-      # we do a trick here because /proc/[pid]/mem might be marked as readable but fails at sysopen.
-      os = OpenStruct.new(readable?: stat.readable_real?, writable?: stat.writable_real?)
-      begin
-        os.readable? && File.open(file, 'rb').close
-      rescue Errno::EACCES
-        os[:readable?] = false
-      end
-      begin
-        os.writable? && File.open(file, 'wb').close
-      rescue Errno::EACCES
-        os[:writable?] = false
-      end
-      os
+      FilePermission.new(file)
     end
 
     # Evaluate string safely.
@@ -97,7 +107,7 @@ module MemoryIO
     #   Util.unpack("@\xE2\x01\x00")
     #   #=> 123456
     def unpack(str)
-      str.bytes.reverse.reduce(0) { |s, c| s * 256 + c }
+      str.bytes.reverse.reduce(0) { |s, c| (s * 256) + c }
     end
 
     # Pack an integer into +b+ bytes.
@@ -135,9 +145,13 @@ module MemoryIO
     #   #=> 'libcrypto'
     #   Util.trim_libname('not_a_so')
     #   #=> 'not_a_so'
+    #   Util.trim_libname('ld-linux-x86-64.so.2')
+    #   #=> 'ld'
     def trim_libname(name)
+      return 'ld' if name.start_with?('ld-')
+
       type1 = '(-[\d.]+)?\.so$'
-      type2 = '\.so.\d+[\d.]+$'
+      type2 = '\.so.[\.\d]+$'
       name.sub(/#{type1}|#{type2}/, '')
     end
   end

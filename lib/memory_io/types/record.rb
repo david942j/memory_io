@@ -23,8 +23,8 @@ module MemoryIO
       # @option [Thread::Backtrace::Location] caller
       #   This option should present if and only if +object+ is a subclass of {Types::Type}.
       # @option [String] doc
-      #   Docstring.
-      #   Automatically parse from caller location if this parameter isn't present.
+      #   Doc-string.
+      #   Automatically parse from caller location if this parameter doesn't present.
       def initialize(object, keys, option = {})
         @obj = object
         @keys = keys
@@ -60,14 +60,14 @@ module MemoryIO
           str.strip!
           break unless str.start_with?('#')
 
-          strings.unshift(str[2..-1] || '')
+          strings.unshift(str[2..] || '')
         end
         trim_docstring(strings)
       end
 
       def trim_docstring(strings)
         strings = strings.drop_while { |s| s.start_with?('@') }.take_while { |s| !s.start_with?('@') }
-        strings.drop_while(&:empty?).reverse.drop_while(&:empty?).reverse.join("\n") + "\n"
+        "#{strings.drop_while(&:empty?).reverse.drop_while(&:empty?).reverse.join("\n")}\n"
       end
     end
   end
