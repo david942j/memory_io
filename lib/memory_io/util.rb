@@ -18,12 +18,12 @@ module MemoryIO
         @writable = stat.writable_real?
         # we do a trick here because /proc/[pid]/mem might be marked as writeable but fails at sysopen.
         begin
-          @readable && File.open(file, 'rb').close
+          @readable && File.open(file, 'rb', &:close)
         rescue Errno::EACCES
           @readable = false
         end
         begin
-          @writable && File.open(file, 'wb').close
+          @writable && File.open(file, 'wb', &:close)
         rescue Errno::EACCES
           @writable = false
         end
