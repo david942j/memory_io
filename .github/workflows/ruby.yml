@@ -15,13 +15,14 @@ jobs:
   test:
 
     runs-on: ${{ matrix.os }}-latest
+    continue-on-error: ${{ matrix.ruby-version == 'head' }}
     strategy:
       matrix:
         os: [ubuntu]
-        ruby-version: ['3.2', '3.3', '3.4', head]
+        ruby-version: ['3.3', '3.4', '4.0', head]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -30,7 +31,7 @@ jobs:
     - name: Run tests
       run: bundle exec rake
     - name: Publish code coverage
-      if: ${{ success() && runner.os == 'Linux' }}
+      if: ${{ success() && runner.os == 'Linux' && github.event.pull_request.head.repo.fork == false }}
       uses: qltysh/qlty-action/coverage@v1
       with:
         oidc: true
