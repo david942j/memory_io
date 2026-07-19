@@ -19,12 +19,14 @@ module MemoryIO
       #
       # @param [Object] object
       # @param [Array<Symbol>] keys
+      # @param [Hash] option
+      #   Extra options.
       #
-      # @option [Thread::Backtrace::Location] caller
-      #   This option should present if and only if +object+ is a subclass of {Types::Type}.
-      # @option [String] doc
+      # @option option [Thread::Backtrace::Location] :caller
+      #   This option should be present if and only if +object+ is a subclass of {Types::Type}.
+      # @option option [String] :doc
       #   Doc-string.
-      #   Automatically parse from caller location if this parameter doesn't present.
+      #   Automatically parsed from caller location if this option isn't present.
       def initialize(object, keys, option = {})
         @obj = object
         @keys = keys

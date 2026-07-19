@@ -5,7 +5,7 @@ require 'memory_io/util'
 
 module MemoryIO
   module Types
-    # The base class, all descendants of this class would be consider as a valid 'type'.
+    # The base class, all descendants of this class would be considered as a valid 'type'.
     class Type
       # The size of +size_t+. i.e. +sizeof(size_t)+.
       SIZE_T = 8
@@ -81,8 +81,9 @@ module MemoryIO
         # @param [Symbol] symbol
         #   Symbol that has been registered in {.register}.
         #
-        # @return [{Symbol => Object}]
-        #   The object that registered in {.register}.
+        # @return [MemoryIO::Types::Record?]
+        #   The record that was registered in {.register},
+        #   or +nil+ if +symbol+ has never been registered.
         #
         # @see .register
         def find(symbol)
@@ -93,10 +94,12 @@ module MemoryIO
         #
         # @param [#read, #write] object
         #   Normally, +object+ is a descendant class of {Type}.
+        # @param [Hash] option
+        #   Extra options.
         #
-        # @option [Symbol, Array<Symbol>] alias
+        # @option option [Symbol, Array<Symbol>] :alias
         #   Custom symbol name(s) that can be used in {.find}.
-        # @option [String] doc
+        # @option option [String] :doc
         #   Doc string that will be shown in README.md.
         #
         # @return [Array<Symbol>]
@@ -117,7 +120,7 @@ module MemoryIO
         #
         # @note
         #   If all symbols in +alias+ have been registered, an ArgumentError will be raised.
-        #   However, if at least one of aliases hasn't been used, registration will success.
+        #   However, if at least one of aliases hasn't been used, registration will succeed.
         #
         # @see .find
         def register(object, option = {})

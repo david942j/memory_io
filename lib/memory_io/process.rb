@@ -74,9 +74,9 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
     # Read from process's memory.
     #
-    # This method has *almost* same arguements and return types as {IO#read}.
+    # This method has *almost* same arguments and return types as {IO#read}.
     # The only difference is this method needs parameter +addr+ (which
-    # will be passed to paramter +from+ in {IO#read}).
+    # will be passed to parameter +from+ in {IO#read}).
     #
     # @param [Integer, String] addr
     #   The address start to read.

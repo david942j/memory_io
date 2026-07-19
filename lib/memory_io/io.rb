@@ -25,7 +25,7 @@ module MemoryIO
     #   Number of elements to be read.
     #   This parameter must be positive and larger than zero.
     #
-    #   This parameter may effect the return type,
+    #   This parameter may affect the return type,
     #   see documents of return value.
     # @param [Integer?] from
     #   Invoke +stream.pos = from+ before starting to read.
@@ -57,7 +57,7 @@ module MemoryIO
     #   * +as != nil+ and +num_elements > 1+:
     #     An array with length +num_elements+ is returned.
     #
-    #   If EOF is occured, object(s) read will be returned.
+    #   If EOF occurred, object(s) read will be returned.
     #
     # @example
     #   stream = StringIO.new('A' * 8 + 'B' * 8)
@@ -67,7 +67,7 @@ module MemoryIO
     #   io.read(100)
     #   #=> "BBBBBBB"
     #
-    #   # read two unsigned 32-bit integers starts from posistion 4
+    #   # read two unsigned 32-bit integers starting from position 4
     #   io.read(2, from: 4, as: :u32)
     #   #=> [1094795585, 1111638594] # [0x41414141, 0x42424242]
     #
@@ -125,7 +125,7 @@ module MemoryIO
     #
     #   A +Proc+ is allowed, which should accept +stream+ and one object as arguments.
     #
-    #   If +objects+ is a descendant instance of {Types::Type} and +as+ is +nil,
+    #   If +objects+ is a descendant instance of {Types::Type} and +as+ is +nil+,
     #   +objects.class+ will be used for +as+.
     #   Otherwise, when +as = nil+, this method will simply call +stream.write(objects)+.
     #

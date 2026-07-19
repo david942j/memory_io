@@ -10,7 +10,7 @@ module MemoryIO
       #
       # All types registered by this class are assumed as *little endian*.
       #
-      # This class registered (un)signed {8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
+      # This class registered (un)signed (8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
       class Number
         # @param [Integer] bytes
         #   Bytes.
