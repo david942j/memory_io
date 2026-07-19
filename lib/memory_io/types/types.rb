@@ -18,16 +18,16 @@ module MemoryIO
     #
     # This method will search all descendants of {Types::Type}.
     #
-    # @return [Symbol] name
+    # @param [Symbol] name
     #   Class name to be searched.
     #
     # @return [#read, #write]
     #   Any object that implemented method +read+ and +write+.
-    #   Usually returns a class inherit {Types::Type}.
+    #   Usually returns a class inherited from {Types::Type}.
     #
     # @example
     #   Types.find(:c_str)
-    #   #=> MemoryIO::Types::CStr
+    #   #=> MemoryIO::Types::Clang::CStr
     #
     #   Types.find(:u64)
     #   #=> #<MemoryIO::Types::Number:0x000055ecc017a310 @bytes=8, @pack_str="Q", @signed=false>
@@ -50,7 +50,7 @@ module MemoryIO
     #
     # @example
     #   Types.get_proc(:c_str, :write)
-    #   #=> #<Method: MemoryIO::Types::CStr.write>
+    #   #=> #<Method: MemoryIO::Types::Clang::CStr.write>
     #   Types.get_proc(:s32, :read)
     #   #=> #<Method: MemoryIO::Types::Number#read>
     def get_proc(name, rw)

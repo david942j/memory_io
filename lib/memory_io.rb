@@ -9,10 +9,14 @@ module MemoryIO
   # Get a process by process id.
   #
   # @param [Integer] pid
-  #   Process Id in linux.
+  #   Process id in Linux.
   #
   # @return [MemoryIO::Process]
   #   A process object for further usage.
+  #
+  # @example
+  #   process = MemoryIO.attach(`pidof victim`.to_i)
+  #   process.read('heap', 8)
   def attach(pid)
     MemoryIO::Process.new(pid)
   end
