@@ -95,6 +95,9 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     # @return [String, Object, Array<Object>]
     #   See {IO#read}.
     #
+    # @raise [MemoryIO::InvalidAddressError]
+    #   +addr+ is an expression that cannot be evaluated.
+    #
     # @example
     #   process = MemoryIO.attach(`pidof victim`.to_i)
     #   puts process.read('heap', 4, as: :u64).map { |c| '0x%016x' % c }
@@ -126,6 +129,9 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #
     # @return [void]
     #
+    # @raise [MemoryIO::InvalidAddressError]
+    #   +addr+ is an expression that cannot be evaluated.
+    #
     # @example
     #   process = MemoryIO.attach('self')
     #   s = 'A' * 16
@@ -149,10 +155,16 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #
     # @return [Integer]
     #   The resolved address.
+    #
+    # @raise [MemoryIO::InvalidAddressError]
+    #   +addr+ is an expression that cannot be evaluated.
     def resolve_address(addr)
       return addr if addr.is_a?(Integer)
 
-      MemoryIO::Util.safe_eval(addr, **bases)
+      address = MemoryIO::Util.safe_eval(addr, **bases)
+      raise MemoryIO::InvalidAddressError, "Failed to evaluate address: #{addr.inspect}" if address.nil?
+
+      address
     end
 
     def mem_io(perm)

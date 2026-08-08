@@ -12,6 +12,14 @@ describe MemoryIO::Process do
     expect { described_class.new(0) }.to raise_error(MemoryIO::Error)
   end
 
+  it 'raises when the address cannot be evaluated' do
+    process = described_class.new('self')
+    expect { process.read('heep + 0x10', 4) }.to \
+      raise_error(MemoryIO::InvalidAddressError, 'Failed to evaluate address: "heep + 0x10"')
+    expect { process.write('((((', 'A') }.to raise_error(MemoryIO::InvalidAddressError)
+    expect { process.read('0xzz', 4) }.to raise_error(MemoryIO::Error)
+  end
+
   it :initialize do
     allow(File).to receive(:open) { raise Errno::EACCES }
     expect { described_class.new('self') }.to output(<<-EOS).to_stderr

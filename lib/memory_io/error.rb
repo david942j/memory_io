@@ -21,4 +21,11 @@ module MemoryIO
   #   MemoryIO.attach(0)
   #   # MemoryIO::ProcessNotFoundError: /proc/0/mem does not exist
   class ProcessNotFoundError < Error; end
+
+  # Raised when an address expression cannot be evaluated.
+  #
+  # @example
+  #   MemoryIO.attach('self').read('heep + 0x10', 4)
+  #   # MemoryIO::InvalidAddressError: Failed to evaluate address: "heep + 0x10"
+  class InvalidAddressError < Error; end
 end
