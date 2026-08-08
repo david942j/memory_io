@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'memory_io/error'
 require 'memory_io/io'
 require 'memory_io/util'
 
@@ -17,6 +18,9 @@ module MemoryIO
     # @param [Integer] pid
     #   Process id.
     #
+    # @raise [MemoryIO::ProcessNotFoundError]
+    #   The memory of +pid+ is not accessible.
+    #
     # @note
     #   This class only supports procfs-based system. i.e. /proc is mounted and readable.
     def initialize(pid)
@@ -24,8 +28,7 @@ module MemoryIO
       @mem = "/proc/#{pid}/mem"
       # check permission of '/proc/pid/mem'
       @perm = MemoryIO::Util.file_permission(@mem)
-      # TODO: raise custom exception
-      raise Errno::ENOENT, @mem if perm.nil?
+      raise MemoryIO::ProcessNotFoundError, "#{@mem} does not exist" if perm.nil?
 
       # FIXME: use logger
       warn(<<-EOS.strip) unless perm.readable? || perm.writable?
