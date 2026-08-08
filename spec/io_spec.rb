@@ -33,6 +33,57 @@ describe MemoryIO::IO do
       io = @get_io.call("123\x0045678\x00")
       expect(io.read(2, as: :c_str)).to eq %w[123 45678]
     end
+
+    it 'returns the objects read before eof' do
+      io = @get_io.call("\x01\x02\x03\x04")
+      expect(io.read(3, as: :u32)).to eq [0x04030201]
+
+      io.rewind
+      expect(io.read(2, as: :s32)).to eq [0x04030201]
+
+      io.rewind
+      expect(io.read(4, as: :c_str)).to eq ["\x01\x02\x03\x04"]
+    end
+
+    it 'omits an object that cannot be read in full' do
+      io = @get_io.call("\x01\x02\x03\x04")
+      expect(io.read(1, as: :u64)).to be nil
+      io.rewind
+      expect(io.read(1, as: :u64, force_array: true)).to eq []
+      io.rewind
+      expect(io.read(1, as: :string)).to be nil
+    end
+
+    it 'returns an empty array when the stream is exhausted' do
+      io = @get_io.call('')
+      expect(io.read(2, as: :u32)).to eq []
+      expect(io.read(2, as: :c_str)).to eq []
+      expect(io.read(1, as: :u8)).to be nil
+    end
+
+    it 'detects eof on a stream that has no eof?' do
+      minimal = Class.new do
+        def initialize(str)
+          @io = StringIO.new(str)
+        end
+
+        def pos
+          @io.pos
+        end
+
+        def pos=(val)
+          @io.pos = val
+        end
+
+        def read(*args)
+          @io.read(*args)
+        end
+      end
+      io = MemoryIO::IO.new(minimal.new("\x01\x02\x03\x04"))
+      expect(io.read(3, as: :u32)).to eq [0x04030201]
+      io.rewind
+      expect(io.read(2, as: :u16)).to eq [0x0201, 0x0403]
+    end
   end
 
   describe :write do

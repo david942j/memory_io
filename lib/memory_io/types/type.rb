@@ -19,12 +19,15 @@ module MemoryIO
         # @return [Integer]
         #   Result.
         #
+        # @raise [EOFError]
+        #   Fewer than {Type::SIZE_T} bytes remain in +stream+.
+        #
         # @example
         #   s = StringIO.new("\xEF\xBE\xAD\xDExV4\x00")
         #   Type.read_size_t(s).to_s(16)
         #   #=> '345678deadbeef'
         def read_size_t(stream)
-          MemoryIO::Util.unpack(stream.read(SIZE_T))
+          MemoryIO::Util.unpack(MemoryIO::Util.read_exactly(stream, SIZE_T))
         end
 
         # Pack +val+ into {Type::SIZE_T} bytes and write to +stream+.

@@ -57,7 +57,8 @@ module MemoryIO
     #   * +as != nil+ and +num_elements > 1+:
     #     An array with length +num_elements+ is returned.
     #
-    #   If EOF occurred, object(s) read will be returned.
+    #   If EOF occurred, only the objects that could be read in full are returned,
+    #   so the result may be shorter than +num_elements+ (possibly empty).
     #
     # @example
     #   stream = StringIO.new('A' * 8 + 'B' * 8)
@@ -89,6 +90,17 @@ module MemoryIO
     #   io.read(2, as: :c_str)
     #   #=> ["123", "45678"]
     # @example
+    #   # reading beyond the end of stream returns what was read
+    #   stream = StringIO.new("\x01\x02\x03\x04")
+    #   io = MemoryIO::IO.new(stream)
+    #   io.read(3, as: :u32)
+    #   #=> [67305985]
+    #
+    #   # an object that can't be read in full is not returned
+    #   io.rewind
+    #   io.read(1, as: :u64)
+    #   #=> nil
+    # @example
     #   # pass lambda to `as`
     #   stream = StringIO.new("\x03123\x044567")
     #   io = MemoryIO::IO.new(stream)
@@ -105,8 +117,7 @@ module MemoryIO
       return stream.read(num_elements) if as.nil?
 
       conv = to_proc(as, :read)
-      # TODO: handle eof
-      ret = Array.new(num_elements) { conv.call(stream) }
+      ret = read_elements(num_elements, conv)
       ret = ret.first if num_elements == 1 && !force_array
       ret
     end
@@ -179,6 +190,42 @@ module MemoryIO
     end
 
     private
+
+    # @api private
+    #
+    # Read up to +num_elements+ objects, stopping early at the end of stream.
+    #
+    # An object is only collected if it could be read in full, so a stream
+    # that ends mid-object yields the objects preceding it rather than a
+    # truncated one.
+    #
+    # @return [Array<Object>]
+    def read_elements(num_elements, conv)
+      ret = []
+      num_elements.times do
+        break if eof?
+
+        begin
+          ret << conv.call(stream)
+        rescue ::EOFError
+          break
+        end
+      end
+      ret
+    end
+
+    # @api private
+    #
+    # @return [Boolean]
+    #   Whether +stream+ has no more data to be read.
+    def eof?
+      return stream.eof? if stream.respond_to?(:eof?)
+
+      pos = stream.pos
+      byte = stream.read(1)
+      stream.pos = pos
+      byte.nil? || byte.empty?
+    end
 
     # @api private
     def to_proc(as, rw)

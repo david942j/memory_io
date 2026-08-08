@@ -26,6 +26,15 @@ describe MemoryIO::Util do
     expect(s.writable?).to be false
   end
 
+  it :read_exactly do
+    stream = StringIO.new('1234')
+    expect(described_class.read_exactly(stream, 3)).to eq '123'
+    expect { described_class.read_exactly(stream, 2) }.to \
+      raise_error(EOFError, 'Requires 0x2 bytes, but only 0x1 bytes remain')
+    expect { described_class.read_exactly(stream, 1) }.to \
+      raise_error(EOFError, 'Requires 0x1 bytes, but only 0x0 bytes remain')
+  end
+
   it :safe_eval do
     expect(described_class.safe_eval('0xDEad - 57005')).to be 0
     expect(described_class.safe_eval('heap + 0x10 * pp', heap: 0xde00, pp: 8)).to be 0xde80
