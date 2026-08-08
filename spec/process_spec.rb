@@ -14,7 +14,10 @@ describe MemoryIO::Process do
 
   it :initialize do
     allow(File).to receive(:open) { raise Errno::EACCES }
-    expect { described_class.new('self') }.to output(<<-EOS).to_stderr
+    log = StringIO.new
+    MemoryIO.logger = Logger.new(log, formatter: ->(_severity, _datetime, _progname, msg) { msg })
+    described_class.new('self')
+    expect(log.string).to eq <<-EOS.strip
 You have no permission to read/write this process.
 
 Check the setting of /proc/sys/kernel/yama/ptrace_scope, or try
@@ -24,6 +27,8 @@ To enable attach another process, do:
 
 $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     EOS
+  ensure
+    MemoryIO.logger = nil
   end
 
   it :bases do
