@@ -107,7 +107,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   #=> "\x7fELF"
     # @see IO#read
     def read(addr, num_elements, **options)
-      mem_io(:read) { |io| io.read(num_elements, from: MemoryIO::Util.safe_eval(addr, **bases), **options) }
+      mem_io(:read) { |io| io.read(num_elements, from: resolve_address(addr), **options) }
     end
 
     # Write objects at +addr+.
@@ -131,10 +131,26 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   #=> 'BBBBCCCCAAAAAAAA'
     # @see IO#write
     def write(addr, objects, **options)
-      mem_io(:write) { |io| io.write(objects, from: MemoryIO::Util.safe_eval(addr, **bases), **options) }
+      mem_io(:write) { |io| io.write(objects, from: resolve_address(addr), **options) }
     end
 
     private
+
+    # Resolve +addr+ into an absolute address.
+    #
+    # {#bases} is only consulted when +addr+ is an expression that can
+    # reference it, so an address that is already absolute costs no extra work.
+    #
+    # @param [Integer, String] addr
+    #   The address to resolve.
+    #
+    # @return [Integer]
+    #   The resolved address.
+    def resolve_address(addr)
+      return addr if addr.is_a?(Integer)
+
+      MemoryIO::Util.safe_eval(addr, **bases)
+    end
 
     def mem_io(perm)
       flags = perm == :write ? 'wb' : 'rb'

@@ -39,6 +39,17 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     process.write('ruby + 0', was)
   end
 
+  it 'resolves an integer address without parsing maps' do
+    process = described_class.new('self')
+    addr = process.bases[:ruby]
+    expect(process).not_to receive(:bases)
+    expect(process.read(addr, 4)).to eq "\x7fELF"
+    was = process.read(addr, 4)
+    process.write(addr, 'ABCD')
+    expect(process.read(addr, 4)).to eq 'ABCD'
+    process.write(addr, was)
+  end
+
   it 'use custom type' do
     process = described_class.new('self')
 
