@@ -78,17 +78,18 @@ module MemoryIO
     # @param [{Symbol => Integer}] vars
     #   Predefined variables
     #
-    # @return [Integer]
-    #   Result.
+    # @return [Integer?]
+    #   Result, or +nil+ if +str+ is not a valid expression.
     #
     # @example
     #   Util.safe_eval('heap + 0x10 * pp', heap: 0xde00, pp: 8)
     #   #=> 56960 # 0xde80
+    #
+    #   Util.safe_eval('0xzz')
+    #   #=> nil
     def safe_eval(str, **vars)
       return str if str.is_a?(Integer)
 
-      # dentaku 2 doesn't support hex
-      str = str.gsub(/0x[0-9a-zA-Z]+/) { |c| c.to_i(16) }
       Dentaku::Calculator.new.store(vars).evaluate(str)
     end
 
