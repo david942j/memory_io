@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'memory_io/io'
+require 'memory_io/util'
+
 module MemoryIO
   # Records information of a process.
   class Process
