@@ -20,6 +20,13 @@ describe MemoryIO::Types::Type do
     expect(stream.pos).to be_zero
   end
 
+  it 'keep_pos resumes position when the block raises' do
+    stream = StringIO.new('1234')
+    stream.pos = 3
+    expect { described_class.keep_pos(stream, pos: 0) { raise 'oops' } }.to raise_error(RuntimeError, 'oops')
+    expect(stream.pos).to eq 3
+  end
+
   it :register do
     expect(described_class.register(Integer)).to eq [:integer]
     module MemoryIO
