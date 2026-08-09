@@ -34,6 +34,22 @@ describe MemoryIO::IO do
       expect(io.read(2, as: :c_str)).to eq %w[123 45678]
     end
 
+    it 'rejects a num_elements that cannot be read' do
+      io = @get_io.call('AAAA')
+      [-1, 2.5, nil].each do |bad|
+        expect { io.read(bad, as: :u8) }.to \
+          raise_error(ArgumentError, "num_elements must be a non-negative Integer, got #{bad.inspect}")
+        expect { io.read(bad) }.to raise_error(ArgumentError)
+      end
+    end
+
+    it 'reads nothing when asked for nothing' do
+      io = @get_io.call('AAAA')
+      expect(io.read(0)).to eq ''
+      expect(io.read(0, as: :u8)).to eq []
+      expect(io.stream.pos).to be_zero
+    end
+
     it 'returns the objects read before eof' do
       io = @get_io.call("\x01\x02\x03\x04")
       expect(io.read(3, as: :u32)).to eq [0x04030201]
