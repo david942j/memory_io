@@ -18,6 +18,21 @@ describe MemoryIO::Process do
       raise_error(MemoryIO::InvalidAddressError, 'Failed to evaluate address: "heep + 0x10"')
     expect { process.write('((((', 'A') }.to raise_error(MemoryIO::InvalidAddressError)
     expect { process.read('0xzz', 4) }.to raise_error(MemoryIO::Error)
+    # dentaku answers some expressions with something that is not a number at all
+    expect { process.read('1 > 2', 4) }.to \
+      raise_error(MemoryIO::InvalidAddressError, 'Failed to evaluate address: "1 > 2"')
+  end
+
+  it 'raises when the address is not an integer' do
+    process = described_class.new('self')
+    expect { process.read('ruby + 1 / 3', 4) }.to \
+      raise_error(MemoryIO::InvalidAddressError, 'Address is not an integer: "ruby + 1 / 3"')
+  end
+
+  it 'accepts an expression whose value is a whole number' do
+    process = described_class.new('self')
+    # division always answers with a BigDecimal, whole or not
+    expect(process.read('(ruby + 8) / 2 * 2 - 8', 4)).to eq "\x7fELF"
   end
 
   it :initialize do
