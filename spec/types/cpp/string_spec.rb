@@ -38,6 +38,22 @@ The std::string class can be seen as:
     expect(str).to eq '#<MemoryIO::Types::CPP::String @data="meow", @capacity=15, @dataplus=0x00007fffdeadbeef>'
   end
 
+  it 'reads a string laid out unlike this host' do
+    # dataplus and length are pointer sized, so a 32-bit string is 8 bytes shorter
+    blob = lambda do |pack|
+      head = [0x20, 26, 31].pack("#{pack}3") + ("\x00" * 12)
+      "#{head.ljust(0x20, "\x00")}abcdefghijklmnopqrstuvwxyz\x00"
+    end
+
+    { 'L<' => :little, 'L>' => :big }.each do |pack, endian|
+      io = MemoryIO::IO.new(StringIO.new(blob.call(pack)), pointer_size: 4, endian: endian)
+      string = io.read(1, as: :'cpp/string')
+      expect(string.data).to eq 'abcdefghijklmnopqrstuvwxyz'
+      expect(string.capacity).to eq 31
+      expect(string.dataplus).to eq 0x20
+    end
+  end
+
   it 'warns when data is set beyond capacity' do
     log = StringIO.new
     MemoryIO.logger = Logger.new(log, formatter: ->(_severity, _datetime, _progname, msg) { msg })

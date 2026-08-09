@@ -8,11 +8,15 @@ module MemoryIO
   module Types
     # The base class, all descendants of this class would be considered as a valid 'type'.
     class Type
-      # The size of +size_t+. i.e. +sizeof(size_t)+.
-      SIZE_T = 8
+      # The size of +size_t+ assumed when the stream says nothing more specific.
+      #
+      # @see MemoryIO::Context#pointer_size
+      SIZE_T = MemoryIO::Context::DEFAULT_POINTER_SIZE
 
       class << self
-        # Read {Type::SIZE_T} bytes and cast to a little endian unsigned integer.
+        # Read one +size_t+ and cast it to an unsigned integer.
+        #
+        # Its width and byte order are taken from the {MemoryIO::Context} of +stream+.
         #
         # @param [#read] stream
         #   Stream to read.
@@ -21,18 +25,20 @@ module MemoryIO
         #   Result.
         #
         # @raise [EOFError]
-        #   Fewer than {Type::SIZE_T} bytes remain in +stream+.
+        #   Fewer bytes than a +size_t+ remain in +stream+.
         #
         # @example
         #   s = StringIO.new("\xEF\xBE\xAD\xDExV4\x00")
         #   Type.read_size_t(s).to_s(16)
         #   #=> '345678deadbeef'
         def read_size_t(stream)
-          endian = MemoryIO::Context.of(stream).endian
-          MemoryIO::Util.unpack(MemoryIO::Util.read_exactly(stream, SIZE_T), endian)
+          context = MemoryIO::Context.of(stream)
+          MemoryIO::Util.unpack(MemoryIO::Util.read_exactly(stream, context.pointer_size), context.endian)
         end
 
-        # Pack +val+ into {Type::SIZE_T} bytes and write to +stream+.
+        # Pack +val+ into one +size_t+ and write it to +stream+.
+        #
+        # Its width and byte order are taken from the {MemoryIO::Context} of +stream+.
         #
         # @param [#write] stream
         #   Stream to write.
@@ -47,8 +53,8 @@ module MemoryIO
         #   s.string
         #   #=> "\x23\x01\x00\x00\x00\x00\x00\x00"
         def write_size_t(stream, val)
-          endian = MemoryIO::Context.of(stream).endian
-          stream.write(MemoryIO::Util.pack(val, SIZE_T, endian))
+          context = MemoryIO::Context.of(stream)
+          stream.write(MemoryIO::Util.pack(val, context.pointer_size, context.endian))
         end
 
         # Yield a block and resume the position of stream.

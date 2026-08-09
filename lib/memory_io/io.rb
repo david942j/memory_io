@@ -25,13 +25,15 @@ module MemoryIO
     #   Byte order of the memory reached through +stream+.
     #   The default is right whenever that memory belongs to a process on this host,
     #   and should be given when it does not, such as a dump taken elsewhere.
+    # @param [Integer] pointer_size
+    #   Size of a pointer in that memory, in bytes.
     #
     # @example
-    #   # a dump captured on a big endian machine
-    #   MemoryIO::IO.new(File.open('core.dump', 'rb'), endian: :big)
-    def initialize(stream, endian: :native)
+    #   # a dump captured on a 32-bit big endian machine
+    #   MemoryIO::IO.new(File.open('core.dump', 'rb'), endian: :big, pointer_size: 4)
+    def initialize(stream, endian: :native, pointer_size: MemoryIO::Context::DEFAULT_POINTER_SIZE)
       @stream = stream
-      @context = MemoryIO::Context.new(endian: endian)
+      @context = MemoryIO::Context.new(endian: endian, pointer_size: pointer_size)
       @tagged = MemoryIO::Stream.new(stream, @context)
     end
 
