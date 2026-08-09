@@ -120,10 +120,11 @@ module MemoryIO
     end
 
     # Unpack a string into an integer.
-    # Little endian is used.
     #
     # @param [String] str
     #   String.
+    # @param [:little, :big] endian
+    #   Byte order of +str+.
     #
     # @return [Integer]
     #   Result.
@@ -133,12 +134,14 @@ module MemoryIO
     #   #=> 255
     #   Util.unpack("@\xE2\x01\x00")
     #   #=> 123456
-    def unpack(str)
-      str.bytes.reverse.reduce(0) { |s, c| (s * 256) + c }
+    #   Util.unpack("\x00\x01\xE2@", :big)
+    #   #=> 123456
+    def unpack(str, endian = :little)
+      bytes = endian == :little ? str.bytes.reverse : str.bytes
+      bytes.reduce(0) { |s, c| (s * 256) + c }
     end
 
     # Pack an integer into +b+ bytes.
-    # Little endian is used.
     #
     # @param [Integer] val
     #   The integer to pack.
@@ -146,6 +149,8 @@ module MemoryIO
     #   only lower +b+ bytes in +val+ will be packed.
     #
     # @param [Integer] b
+    # @param [:little, :big] endian
+    #   Byte order to pack +val+ in.
     #
     # @return [String]
     #   Packing result with length +b+.
@@ -153,8 +158,12 @@ module MemoryIO
     # @example
     #   Util.pack(0x123, 4)
     #   #=> "\x23\x01\x00\x00"
-    def pack(val, b)
-      Array.new(b) { |i| (val >> (i * 8)) & 0xff }.pack('C*')
+    #   Util.pack(0x123, 4, :big)
+    #   #=> "\x00\x00\x01\x23"
+    def pack(val, b, endian = :little)
+      bytes = Array.new(b) { |i| (val >> (i * 8)) & 0xff }
+      bytes.reverse! if endian == :big
+      bytes.pack('C*')
     end
 
     # Remove extension name (.so) and version in library name.

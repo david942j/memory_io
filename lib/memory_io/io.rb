@@ -1,12 +1,18 @@
 # encoding: ascii-8bit
 # frozen_string_literal: true
 
+require 'memory_io/context'
+require 'memory_io/stream'
 require 'memory_io/types/types'
 
 module MemoryIO
   # Main class to use {MemoryIO}.
   class IO
-    attr_reader :stream # @return [#pos, #pos=, #read, #write]
+    # @!attribute [r] stream
+    #   @return [#pos, #pos=, #read, #write] The stream given at instantiation.
+    # @!attribute [r] context
+    #   @return [MemoryIO::Context] How the memory reached through {#stream} lays out its data.
+    attr_reader :stream, :context
 
     # Instantiate an {IO} object.
     #
@@ -15,8 +21,18 @@ module MemoryIO
     #   +file+ can be un-writable if you will not invoke any write-related method.
     #
     #   If +stream.read(*)+ returns empty string or +nil+, it would be seen as reaching EOF.
-    def initialize(stream)
+    # @param [:little, :big, :native] endian
+    #   Byte order of the memory reached through +stream+.
+    #   The default is right whenever that memory belongs to a process on this host,
+    #   and should be given when it does not, such as a dump taken elsewhere.
+    #
+    # @example
+    #   # a dump captured on a big endian machine
+    #   MemoryIO::IO.new(File.open('core.dump', 'rb'), endian: :big)
+    def initialize(stream, endian: :native)
       @stream = stream
+      @context = MemoryIO::Context.new(endian: endian)
+      @tagged = MemoryIO::Stream.new(stream, @context)
     end
 
     # Read and convert result into custom type/structure.
@@ -178,7 +194,7 @@ module MemoryIO
       return stream.write(objects) if as.nil?
 
       conv = to_proc(as, :write)
-      Array(objects).map { |o| conv.call(stream, o) }
+      Array(objects).map { |o| conv.call(@tagged, o) }
     end
 
     # Set +stream+ to the beginning.
@@ -206,7 +222,7 @@ module MemoryIO
         break if eof?
 
         begin
-          ret << conv.call(stream)
+          ret << conv.call(@tagged)
         rescue ::EOFError
           break
         end

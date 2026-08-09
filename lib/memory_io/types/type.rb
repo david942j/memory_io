@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'memory_io/context'
 require 'memory_io/types/record'
 require 'memory_io/util'
 
@@ -27,7 +28,8 @@ module MemoryIO
         #   Type.read_size_t(s).to_s(16)
         #   #=> '345678deadbeef'
         def read_size_t(stream)
-          MemoryIO::Util.unpack(MemoryIO::Util.read_exactly(stream, SIZE_T))
+          endian = MemoryIO::Context.of(stream).endian
+          MemoryIO::Util.unpack(MemoryIO::Util.read_exactly(stream, SIZE_T), endian)
         end
 
         # Pack +val+ into {Type::SIZE_T} bytes and write to +stream+.
@@ -45,7 +47,8 @@ module MemoryIO
         #   s.string
         #   #=> "\x23\x01\x00\x00\x00\x00\x00\x00"
         def write_size_t(stream, val)
-          stream.write(MemoryIO::Util.pack(val, SIZE_T))
+          endian = MemoryIO::Context.of(stream).endian
+          stream.write(MemoryIO::Util.pack(val, SIZE_T, endian))
         end
 
         # Yield a block and resume the position of stream.
