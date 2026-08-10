@@ -38,6 +38,18 @@ The std::string class can be seen as:
     expect(str).to eq '#<MemoryIO::Types::CPP::String @data="meow", @capacity=15, @dataplus=0x00007fffdeadbeef>'
   end
 
+  it 'warns when data is set beyond capacity' do
+    log = StringIO.new
+    MemoryIO.logger = Logger.new(log, formatter: ->(_severity, _datetime, _progname, msg) { msg })
+    str = described_class.new('meow', 15, 0)
+    str.data = 'A' * 15
+    expect(log.string).to be_empty
+    str.data = 'A' * 16
+    expect(log.string).to eq 'Length of str (16) is larger than capacity (15)'
+  ensure
+    MemoryIO.logger = nil
+  end
+
   it :read do
     @launch.call do |_i, o, process|
       addrs = Array.new(3) { o.gets.to_i(16) }

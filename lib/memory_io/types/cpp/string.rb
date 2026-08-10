@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'memory_io/logger'
 require 'memory_io/types/type'
 
 module MemoryIO
@@ -50,7 +51,9 @@ module MemoryIO
         # @param [String] str
         def data=(str)
           @data = str
-          warn("Length of str (#{str.size}) is larger than capacity (#{capacity})") if str.size > capacity
+          return unless str.size > capacity
+
+          MemoryIO.logger.warn("Length of str (#{str.size}) is larger than capacity (#{capacity})")
         end
 
         # Custom inspect view.

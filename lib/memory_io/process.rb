@@ -2,6 +2,7 @@
 
 require 'memory_io/error'
 require 'memory_io/io'
+require 'memory_io/logger'
 require 'memory_io/util'
 
 module MemoryIO
@@ -30,8 +31,7 @@ module MemoryIO
       @perm = MemoryIO::Util.file_permission(@mem)
       raise MemoryIO::ProcessNotFoundError, "#{@mem} does not exist" if perm.nil?
 
-      # FIXME: use logger
-      warn(<<-EOS.strip) unless perm.readable? || perm.writable?
+      MemoryIO.logger.warn(<<-EOS.strip) unless perm.readable? || perm.writable?
 You have no permission to read/write this process.
 
 Check the setting of /proc/sys/kernel/yama/ptrace_scope, or try
