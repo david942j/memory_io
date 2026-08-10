@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'memory_io/context'
 require 'memory_io/error'
 require 'memory_io/types/type'
 
@@ -9,29 +10,36 @@ module MemoryIO
     module Basic
       # Register numbers to {Types}.
       #
-      # All types registered by this class are assumed as *little endian*.
+      # The byte order is taken from the {MemoryIO::Context} of the stream being
+      # read, so the same type reads correctly from memory of either byte order.
       #
       # This class registered (un)signed (8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
       class Number
-        # Pack indicators of the types that hold a real number. They overflow
-        # by losing magnitude rather than by wrapping, so they are bounded
-        # differently from the integer types.
+        # Indicators of the integer widths, by size in bytes.
+        # A single byte has no byte order to indicate.
+        INTEGER_INDICATORS = { 1 => 'C', 2 => 'S', 4 => 'L', 8 => 'Q' }.freeze
+
+        # Indicators of the real widths, by size in bytes and then byte order.
         #
         # @example
-        #   # 'F' and 'D' are IEEE-754 single and double precision.
-        REAL_INDICATORS = %w[F D].freeze
+        #   # 'e' and 'E' are IEEE-754 single and double precision, little endian.
+        REAL_INDICATORS = { 4 => { little: 'e', big: 'g' }, 8 => { little: 'E', big: 'G' } }.freeze
+
+        # Appended to an integer indicator to fix its byte order.
+        ENDIAN_INDICATORS = { little: '<', big: '>' }.freeze
 
         # @param [Integer] bytes
         #   Bytes.
         # @param [Boolean] signed
         #   Signed or unsigned.
-        # @param [String] pack_str
-        #   The indicator to be passed to +Array#pack+ and +String#unpack+.
-        def initialize(bytes, signed, pack_str)
+        # @param [Boolean] real
+        #   Whether this type holds a real number rather than an integer.
+        def initialize(bytes, signed, real: false)
           @bytes = bytes
           @signed = signed
-          @pack_str = pack_str
-          @range = value_range unless REAL_INDICATORS.include?(pack_str)
+          @real = real
+          @range = value_range unless real
+          @indicators = ENDIAN_INDICATORS.keys.to_h { |e| [e, indicator(e)] }
         end
 
         # @return [Integer]
@@ -39,7 +47,8 @@ module MemoryIO
         # @raise [EOFError]
         #   Fewer than +bytes+ bytes remain in +stream+.
         def read(stream)
-          unpack(MemoryIO::Util.read_exactly(stream, @bytes))
+          endian = MemoryIO::Context.of(stream).endian
+          unpack(MemoryIO::Util.read_exactly(stream, @bytes), endian)
         end
 
         # @param [Integer] val
@@ -47,9 +56,10 @@ module MemoryIO
         # @raise [MemoryIO::ValueOutOfRangeError]
         #   +val+ doesn't fit in this type, which would otherwise be written truncated.
         def write(stream, val)
-          raise MemoryIO::ValueOutOfRangeError, out_of_range_message(val) if out_of_range?(val)
+          endian = MemoryIO::Context.of(stream).endian
+          raise MemoryIO::ValueOutOfRangeError, out_of_range_message(val) if out_of_range?(val, endian)
 
-          stream.write(pack(val))
+          stream.write(pack(val, endian))
         end
 
         private
@@ -58,11 +68,11 @@ module MemoryIO
         # +Array#pack+ to reject.
         #
         # @return [Boolean]
-        def out_of_range?(val)
+        def out_of_range?(val, endian)
           if @range
             val.is_a?(Integer) && !@range.cover?(val)
           else
-            val.is_a?(Numeric) && overflows?(val)
+            val.is_a?(Numeric) && overflows?(val, endian)
           end
         end
 
@@ -71,8 +81,8 @@ module MemoryIO
         # as is writing an infinity that was asked for.
         #
         # @return [Boolean]
-        def overflows?(val)
-          val.infinite?.nil? && pack(val).unpack1(@pack_str).infinite?
+        def overflows?(val, endian)
+          val.infinite?.nil? && pack(val, endian).unpack1(@indicators[endian]).infinite?
         end
 
         # @return [Range]
@@ -101,36 +111,43 @@ module MemoryIO
           format('%s0x%x', val.negative? ? '-' : '', val.abs)
         end
 
-        def unpack(str)
-          val = str.unpack1(@pack_str)
+        # @return [String]
+        #   The +Array#pack+ indicator of this type in +endian+ byte order.
+        def indicator(endian)
+          return REAL_INDICATORS[@bytes][endian] if @real
+          return INTEGER_INDICATORS[@bytes] if @bytes == 1
+
+          INTEGER_INDICATORS[@bytes] + ENDIAN_INDICATORS[endian]
+        end
+
+        def unpack(str, endian)
+          val = str.unpack1(@indicators[endian])
+          # a real is already signed by its representation
+          return val if @real
+
           val -= (2**(@bytes * 8)) if @signed && val >= (2**((@bytes * 8) - 1))
           val
         end
 
-        def pack(val)
-          [val].pack(@pack_str)
+        def pack(val, endian)
+          [val].pack(@indicators[endian])
         end
 
         # Register (un)signed n-bits integers.
-        {
-          8 => 'C',
-          16 => 'S',
-          32 => 'I',
-          64 => 'Q'
-        }.each do |t, c|
-          Type.register(Number.new(t / 8, true, c),
+        [8, 16, 32, 64].each do |t|
+          Type.register(Number.new(t / 8, true),
                         alias: [:"basic/s#{t}", :"s#{t}"],
                         doc: "A signed #{t}-bit integer.")
-          Type.register(Number.new(t / 8, false, c),
+          Type.register(Number.new(t / 8, false),
                         alias: [:"basic/u#{t}", :"u#{t}"],
                         doc: "An unsigned #{t}-bit integer.")
         end
 
         # Register floating numbers.
-        Type.register(Number.new(4, false, 'F'),
+        Type.register(Number.new(4, true, real: true),
                       alias: %i[basic/float float],
                       doc: 'IEEE-754 32-bit floating number.')
-        Type.register(Number.new(8, false, 'D'),
+        Type.register(Number.new(8, true, real: true),
                       alias: %i[basic/double double],
                       doc: 'IEEE-754 64-bit floating number.')
       end

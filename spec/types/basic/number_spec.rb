@@ -27,6 +27,25 @@ describe MemoryIO::Types::Basic::Number do
       stream = StringIO.new("\x00\x00\x00\x00\x00\x00\xF0\xBF")
       expect(MemoryIO::Types.find(:double).read(stream)).to eq(-1.0)
     end
+
+    it 'reads a real whose magnitude exceeds the signed integer range' do
+      stream = StringIO.new
+      MemoryIO::Types.find(:float).write(stream, 1.5e10)
+      stream.pos = 0
+      expect(MemoryIO::Types.find(:float).read(stream)).to eq 15_000_000_512.0
+      stream.string = +''
+      MemoryIO::Types.find(:double).write(stream, 1.5e30)
+      stream.pos = 0
+      expect(MemoryIO::Types.find(:double).read(stream)).to eq 1.5e30
+    end
+
+    it 'reads the byte order of the context' do
+      big = ->(str) { MemoryIO::Stream.new(StringIO.new(str), MemoryIO::Context.new(endian: :big)) }
+      expect(MemoryIO::Types.find(:u32).read(big.call("\x12\x34\x56\x78"))).to eq 0x12345678
+      expect(MemoryIO::Types.find(:s16).read(big.call("\xff\xfe"))).to eq(-2)
+      expect(MemoryIO::Types.find(:float).read(big.call("\xBF\x80\x00\x00"))).to eq(-1.0)
+      expect(MemoryIO::Types.find(:u8).read(big.call("\xff"))).to eq 0xff
+    end
   end
 
   describe :write do
@@ -46,6 +65,18 @@ describe MemoryIO::Types::Basic::Number do
       stream.string = +''
       MemoryIO::Types.find(:double).write(stream, -0.123)
       expect(stream.string).to eq "\xB0rh\x91\xED|\xBF\xBF"
+    end
+
+    it 'writes the byte order of the context' do
+      %i[little big].each do |endian|
+        stream = StringIO.new
+        tagged = MemoryIO::Stream.new(stream, MemoryIO::Context.new(endian: endian))
+        MemoryIO::Types.find(:u32).write(tagged, 0x12345678)
+        expect(stream.string).to eq(endian == :little ? "\x78\x56\x34\x12" : "\x12\x34\x56\x78")
+        stream.string = +''
+        MemoryIO::Types.find(:float).write(tagged, 1.0)
+        expect(stream.string).to eq(endian == :little ? "\x00\x00\x80\x3f" : "\x3f\x80\x00\x00")
+      end
     end
 
     it 'rejects a value that does not fit' do
