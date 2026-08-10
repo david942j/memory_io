@@ -6,6 +6,12 @@ require 'rubygems'
 require 'memory_io/process'
 
 describe MemoryIO::Process do
+  it 'raises when the process is not accessible' do
+    expect { described_class.new(0) }.to \
+      raise_error(MemoryIO::ProcessNotFoundError, '/proc/0/mem does not exist')
+    expect { described_class.new(0) }.to raise_error(MemoryIO::Error)
+  end
+
   it :initialize do
     allow(File).to receive(:open) { raise Errno::EACCES }
     expect { described_class.new('self') }.to output(<<-EOS).to_stderr

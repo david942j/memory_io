@@ -14,6 +14,9 @@ module MemoryIO
   # @return [MemoryIO::Process]
   #   A process object for further usage.
   #
+  # @raise [MemoryIO::ProcessNotFoundError]
+  #   The memory of +pid+ is not accessible.
+  #
   # @example
   #   process = MemoryIO.attach(`pidof victim`.to_i)
   #   process.read('heap', 8)
