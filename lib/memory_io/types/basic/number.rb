@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'memory_io/error'
 require 'memory_io/types/type'
 
 module MemoryIO
@@ -12,6 +13,14 @@ module MemoryIO
       #
       # This class registered (un)signed (8, 16, 32, 64)-bit integers and IEEE-754 floating numbers.
       class Number
+        # Pack indicators of the types that hold a real number. They overflow
+        # by losing magnitude rather than by wrapping, so they are bounded
+        # differently from the integer types.
+        #
+        # @example
+        #   # 'F' and 'D' are IEEE-754 single and double precision.
+        REAL_INDICATORS = %w[F D].freeze
+
         # @param [Integer] bytes
         #   Bytes.
         # @param [Boolean] signed
@@ -22,6 +31,7 @@ module MemoryIO
           @bytes = bytes
           @signed = signed
           @pack_str = pack_str
+          @range = value_range unless REAL_INDICATORS.include?(pack_str)
         end
 
         # @return [Integer]
@@ -33,11 +43,63 @@ module MemoryIO
         end
 
         # @param [Integer] val
+        #
+        # @raise [MemoryIO::ValueOutOfRangeError]
+        #   +val+ doesn't fit in this type, which would otherwise be written truncated.
         def write(stream, val)
+          raise MemoryIO::ValueOutOfRangeError, out_of_range_message(val) if out_of_range?(val)
+
           stream.write(pack(val))
         end
 
         private
+
+        # Anything that isn't a number of the matching kind is left for
+        # +Array#pack+ to reject.
+        #
+        # @return [Boolean]
+        def out_of_range?(val)
+          if @range
+            val.is_a?(Integer) && !@range.cover?(val)
+          else
+            val.is_a?(Numeric) && overflows?(val)
+          end
+        end
+
+        # A finite value that packs to an infinity has exceeded what the type
+        # can represent. Losing precision is inherent to the type and allowed,
+        # as is writing an infinity that was asked for.
+        #
+        # @return [Boolean]
+        def overflows?(val)
+          val.infinite?.nil? && pack(val).unpack1(@pack_str).infinite?
+        end
+
+        # @return [Range]
+        def value_range
+          bits = @bytes * 8
+          @signed ? (-(2**(bits - 1))..((2**(bits - 1)) - 1)) : (0..((2**bits) - 1))
+        end
+
+        # @return [String]
+        def out_of_range_message(val)
+          return format('%s exceeds the range of %d-bit floating number', val, @bytes * 8) unless @range
+
+          format('%s is out of range for %d-bit %s integer (%s..%s)',
+                 hex(val), @bytes * 8, @signed ? 'signed' : 'unsigned',
+                 hex(@range.first), hex(@range.last))
+        end
+
+        # +format+'s '%#x' renders a negative number in two's complement notation.
+        #
+        # @return [String]
+        #
+        # @example
+        #   hex(-128)
+        #   #=> '-0x80'
+        def hex(val)
+          format('%s0x%x', val.negative? ? '-' : '', val.abs)
+        end
 
         def unpack(str)
           val = str.unpack1(@pack_str)

@@ -28,4 +28,11 @@ module MemoryIO
   #   MemoryIO.attach('self').read('heep + 0x10', 4)
   #   # MemoryIO::InvalidAddressError: Failed to evaluate address: "heep + 0x10"
   class InvalidAddressError < Error; end
+
+  # Raised when a value doesn't fit in the type it is written as.
+  #
+  # @example
+  #   MemoryIO::IO.new(stream).write(0x100000041, as: :u32)
+  #   # MemoryIO::ValueOutOfRangeError: 0x100000041 is out of range for 32-bit unsigned integer (0x0..0xffffffff)
+  class ValueOutOfRangeError < Error; end
 end
