@@ -92,6 +92,32 @@ module MemoryIO
       Dentaku::Calculator.new.store(vars).evaluate(str)
     end
 
+    # @api private
+    #
+    # Read exactly +size+ bytes from +stream+.
+    #
+    # @param [#read] stream
+    #   Stream to read.
+    # @param [Integer] size
+    #   Number of bytes to read.
+    #
+    # @return [String]
+    #   The bytes read.
+    #
+    # @raise [EOFError]
+    #   Fewer than +size+ bytes remain in +stream+.
+    #
+    # @example
+    #   Util.read_exactly(StringIO.new('1234'), 8)
+    #   # EOFError: Requires 0x8 bytes, but only 0x4 bytes remain
+    def read_exactly(stream, size)
+      str = stream.read(size)
+      remain = str.nil? ? 0 : str.size
+      raise ::EOFError, format('Requires 0x%x bytes, but only 0x%x bytes remain', size, remain) if remain < size
+
+      str
+    end
+
     # Unpack a string into an integer.
     # Little endian is used.
     #

@@ -25,8 +25,11 @@ module MemoryIO
         end
 
         # @return [Integer]
+        #
+        # @raise [EOFError]
+        #   Fewer than +bytes+ bytes remain in +stream+.
         def read(stream)
-          unpack(stream.read(@bytes))
+          unpack(MemoryIO::Util.read_exactly(stream, @bytes))
         end
 
         # @param [Integer] val
