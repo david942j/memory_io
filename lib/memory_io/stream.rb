@@ -17,7 +17,7 @@ module MemoryIO
     # @param [#read, #write] stream
     #   The stream to be tagged.
     # @param [MemoryIO::Context] context
-    #   How the memory reached through +stream+ lays out its data.
+    #   The context of the memory reached through +stream+.
     def initialize(stream, context)
       @stream = stream
       @context = context

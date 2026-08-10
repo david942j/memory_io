@@ -7,7 +7,7 @@ require 'memory_io/stream'
 module MemoryIO
   # Describes how the memory being accessed lays out its data.
   #
-  # The layout belongs to the memory, not to the machine running this library.
+  # The context belongs to the memory, not to the machine running this library.
   # They only coincide when the memory belongs to a process on the same host.
   class Context
     # Byte orders that can be asked for. +:native+ resolves to the byte order
@@ -70,8 +70,8 @@ module MemoryIO
         stream.is_a?(MemoryIO::Stream) ? stream.context : default
       end
 
-      # Derive a context from an ELF file, which describes the layout of the
-      # memory it is loaded into.
+      # Derive a context from an ELF file, which describes the memory it is
+      # loaded into.
       #
       # @param [String] path
       #   Path of the ELF file.
