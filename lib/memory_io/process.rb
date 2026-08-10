@@ -12,24 +12,38 @@ module MemoryIO
     # @return [#readable?, #writable?]
     attr_reader :perm
 
+    # @return [MemoryIO::Context]
+    #   How this process lays out its data.
+    attr_reader :context
+
     # @api private
     #
     # Create process object from pid.
     #
     # @param [Integer] pid
     #   Process id.
+    # @param [:little, :big, :native, nil] endian
+    #   Byte order of the process's memory.
+    # @param [Integer?] pointer_size
+    #   Size of a pointer in the process, in bytes.
+    #
+    #   Both default to what the process's executable declares, so a 32-bit
+    #   process is read correctly without being told. Pass them to override
+    #   a target whose executable can't be examined.
     #
     # @raise [MemoryIO::ProcessNotFoundError]
     #   The memory of +pid+ is not accessible.
     #
     # @note
     #   This class only supports procfs-based system. i.e. /proc is mounted and readable.
-    def initialize(pid)
+    def initialize(pid, endian: nil, pointer_size: nil)
       @pid = pid
       @mem = "/proc/#{pid}/mem"
       # check permission of '/proc/pid/mem'
       @perm = MemoryIO::Util.file_permission(@mem)
       raise MemoryIO::ProcessNotFoundError, "#{@mem} does not exist" if perm.nil?
+
+      @context = build_context(endian, pointer_size)
 
       MemoryIO.logger.warn(<<-EOS.strip) unless perm.readable? || perm.writable?
 You have no permission to read/write this process.
@@ -145,6 +159,16 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
     private
 
+    # The executable of a process describes the memory it runs in, so prefer it
+    # over assuming this host's layout. What the caller gave wins over both.
+    #
+    # @return [MemoryIO::Context]
+    def build_context(endian, pointer_size)
+      declared = MemoryIO::Context.from_elf("/proc/#{@pid}/exe") || MemoryIO::Context.new
+      MemoryIO::Context.new(endian: endian || declared.endian,
+                            pointer_size: pointer_size || declared.pointer_size)
+    end
+
     # Resolve +addr+ into an absolute address.
     #
     # {#bases} is only consulted when +addr+ is an expression that can
@@ -169,7 +193,7 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 
     def mem_io(perm)
       flags = perm == :write ? 'wb' : 'rb'
-      File.open(@mem, flags) { |f| yield MemoryIO::IO.new(f) }
+      File.open(@mem, flags) { |f| yield MemoryIO::IO.new(f, **@context.to_h) }
     end
   end
 end

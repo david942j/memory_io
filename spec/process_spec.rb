@@ -39,6 +39,21 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     MemoryIO.logger = nil
   end
 
+  it 'takes its context from the target executable' do
+    process = described_class.new('self')
+    expect(process.context.to_h).to eq MemoryIO::Context.from_elf('/proc/self/exe').to_h
+  end
+
+  it 'lets the caller override the detected context' do
+    process = described_class.new('self', endian: :big, pointer_size: 4)
+    expect(process.context.to_h).to eq(endian: :big, pointer_size: 4)
+  end
+
+  it 'falls back to this host when the executable cannot be read' do
+    allow(MemoryIO::Context).to receive(:from_elf).and_return(nil)
+    expect(described_class.new('self').context.to_h).to eq MemoryIO::Context.new.to_h
+  end
+
   it :bases do
     process = described_class.new('self')
     expect(process.bases.keys).to include(:libc, :heap, :ruby, :ld, :stack)

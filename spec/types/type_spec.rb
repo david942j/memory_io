@@ -8,6 +8,26 @@ describe MemoryIO::Types::Type do
     expect(described_class.read_size_t(s)).to eq 0x345678deadbeef
   end
 
+  it 'reads and writes size_t as the context describes it' do
+    tagged = lambda do |io, **opts|
+      MemoryIO::Stream.new(io, MemoryIO::Context.new(**opts))
+    end
+
+    s = tagged.call(StringIO.new("\x78\x56\x34\x12"), pointer_size: 4)
+    expect(described_class.read_size_t(s)).to eq 0x12345678
+
+    s = tagged.call(StringIO.new("\x12\x34\x56\x78"), pointer_size: 4, endian: :big)
+    expect(described_class.read_size_t(s)).to eq 0x12345678
+
+    io = StringIO.new
+    described_class.write_size_t(tagged.call(io, pointer_size: 4), 0x12345678)
+    expect(io.string).to eq "\x78\x56\x34\x12"
+
+    io = StringIO.new
+    described_class.write_size_t(tagged.call(io, pointer_size: 4, endian: :big), 0x12345678)
+    expect(io.string).to eq "\x12\x34\x56\x78"
+  end
+
   it :write_size_t do
     s = StringIO.new
     described_class.write_size_t(s, 0x123)
