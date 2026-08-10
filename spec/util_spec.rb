@@ -19,7 +19,7 @@ describe MemoryIO::Util do
     expect(s.readable?).to be true
     expect(s.writable?).to be false
 
-    # XXX: how to create a readable but fails-in-sysopen file?
+    # a file that is marked readable but fails at sysopen, as /proc/[pid]/mem can
     allow(File).to receive(:open) { raise Errno::EACCES }
     s = described_class.file_permission('/proc/self/mem')
     expect(s.readable?).to be false
