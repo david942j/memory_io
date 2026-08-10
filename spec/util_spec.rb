@@ -38,6 +38,13 @@ describe MemoryIO::Util do
   it :safe_eval do
     expect(described_class.safe_eval('0xDEad - 57005')).to be 0
     expect(described_class.safe_eval('heap + 0x10 * pp', heap: 0xde00, pp: 8)).to be 0xde80
+    expect(described_class.safe_eval(0xdead)).to be 0xdead
+  end
+
+  it 'safe_eval rejects an invalid expression' do
+    expect(described_class.safe_eval('0xzz')).to be nil
+    expect(described_class.safe_eval('0xzz + 1')).to be nil
+    expect(described_class.safe_eval('unknown_var + 1')).to be nil
   end
 
   it :trim_libname do
