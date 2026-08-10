@@ -50,6 +50,10 @@ module MemoryIO
 
         # Yield a block and resume the position of stream.
         #
+        # The position is resumed even if the block raises,
+        # so a failure while following an invalid pointer doesn't
+        # leave the stream at an unexpected position.
+        #
         # @param [#pos, #pos=] stream
         #   Stream.
         # @param [Integer] pos
@@ -72,9 +76,11 @@ module MemoryIO
         def keep_pos(stream, pos: nil)
           org = stream.pos
           stream.pos = pos if pos
-          ret = yield stream
-          stream.pos = org
-          ret
+          begin
+            yield stream
+          ensure
+            stream.pos = org
+          end
         end
 
         # @api private
