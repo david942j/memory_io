@@ -181,14 +181,16 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     #   The resolved address.
     #
     # @raise [MemoryIO::InvalidAddressError]
-    #   +addr+ is an expression that cannot be evaluated.
+    #   +addr+ is an expression that cannot be evaluated,
+    #   or evaluates to something that is not an address.
     def resolve_address(addr)
       return addr if addr.is_a?(Integer)
 
       address = MemoryIO::Util.safe_eval(addr, **bases)
-      raise MemoryIO::InvalidAddressError, "Failed to evaluate address: #{addr.inspect}" if address.nil?
+      raise MemoryIO::InvalidAddressError, "Failed to evaluate address: #{addr.inspect}" unless address.is_a?(Numeric)
+      raise MemoryIO::InvalidAddressError, "Address is not an integer: #{addr.inspect}" unless address == address.to_i
 
-      address
+      address.to_i
     end
 
     def mem_io(perm)
