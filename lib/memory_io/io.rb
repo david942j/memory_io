@@ -41,7 +41,7 @@ module MemoryIO
     #
     # @param [Integer] num_elements
     #   Number of elements to be read.
-    #   This parameter must be positive and larger than zero.
+    #   Zero reads nothing, as it does for +::IO#read+.
     #
     #   This parameter may affect the return type,
     #   see documents of return value.
@@ -77,6 +77,9 @@ module MemoryIO
     #
     #   If EOF occurred, only the objects that could be read in full are returned,
     #   so the result may be shorter than +num_elements+ (possibly empty).
+    #
+    # @raise [ArgumentError]
+    #   +num_elements+ is negative or is not an Integer.
     #
     # @example
     #   stream = StringIO.new('A' * 8 + 'B' * 8)
@@ -131,6 +134,10 @@ module MemoryIO
     #
     # @see Types
     def read(num_elements, from: nil, as: nil, force_array: false)
+      unless num_elements.is_a?(Integer) && !num_elements.negative?
+        raise ArgumentError, "num_elements must be a non-negative Integer, got #{num_elements.inspect}"
+      end
+
       stream.pos = from if from
       return stream.read(num_elements) if as.nil?
 
