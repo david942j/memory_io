@@ -13,7 +13,7 @@ module MemoryIO
     attr_reader :perm
 
     # @return [MemoryIO::Context]
-    #   How this process lays out its data.
+    #   The context of this process's memory.
     attr_reader :context
 
     # @api private
@@ -29,7 +29,8 @@ module MemoryIO
     #
     #   Both default to what the process's executable declares, so a 32-bit
     #   process is read correctly without being told. Pass them to override
-    #   a target whose executable can't be examined.
+    #   a target whose executable can't be examined, or names an interpreter
+    #   rather than the program itself.
     #
     # @raise [MemoryIO::ProcessNotFoundError]
     #   The memory of +pid+ is not accessible.
@@ -160,7 +161,12 @@ $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     private
 
     # The executable of a process describes the memory it runs in, so prefer it
-    # over assuming this host's layout. What the caller gave wins over both.
+    # over assuming this host's context. What the caller gave wins over both.
+    #
+    # A process started through an interpreter names the interpreter here, whose
+    # context can differ from the program's. Recovering the program's own context
+    # would mean picking it out of the mappings, which aren't populated yet when
+    # a process is attached to right after it starts, so leave that to the caller.
     #
     # @return [MemoryIO::Context]
     def build_context(endian, pointer_size)

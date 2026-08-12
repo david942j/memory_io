@@ -11,7 +11,7 @@ module MemoryIO
     # @!attribute [r] stream
     #   @return [#pos, #pos=, #read, #write] The stream given at instantiation.
     # @!attribute [r] context
-    #   @return [MemoryIO::Context] How the memory reached through {#stream} lays out its data.
+    #   @return [MemoryIO::Context] The context of the memory reached through {#stream}.
     attr_reader :stream, :context
 
     # Instantiate an {IO} object.
