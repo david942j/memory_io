@@ -5,6 +5,28 @@ require 'open3'
 require 'memory_io/process'
 require 'memory_io/types/types'
 
+# Replays regions of a recorded address space, so memory captured elsewhere can
+# be read back at the addresses it was captured from, pointers included.
+class RecordedMemory
+  attr_accessor :pos
+
+  # @param [{Integer => String}] regions
+  #   Bytes recorded at each address.
+  def initialize(regions)
+    @regions = regions
+    @pos = 0
+  end
+
+  def read(size = nil)
+    base, bytes = @regions.find { |addr, data| @pos >= addr && @pos < addr + data.size }
+    return nil if base.nil?
+
+    chunk = bytes[@pos - base, size || bytes.size]
+    @pos += chunk.size
+    chunk
+  end
+end
+
 describe MemoryIO::Types::CPP::String do
   before(:all) do
     @launch = lambda do |&block|
@@ -36,6 +58,35 @@ The std::string class can be seen as:
   it :inspect do
     str = described_class.new('meow', 15, 0x00007fffdeadbeef).inspect
     expect(str).to eq '#<MemoryIO::Types::CPP::String @data="meow", @capacity=15, @dataplus=0x00007fffdeadbeef>'
+  end
+
+  # Captured from an i386 build of test_files/cpp/objects.cpp, running under
+  # qemu-i386 and read with pointer_size 4. `make objects32` rebuilds the
+  # program; the bytes below are verbatim, addresses included.
+  #
+  #   i686-linux-gnu-g++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0 -std=c++14 -static
+  context 'when captured from a 32-bit process' do
+    let(:empty) { ['fcf37f400000000000cf2208500f8040f4cf220800320000'].pack('H*') }
+    let(:inline) { ['14f47f400f00000041414141424242424343434344444400'].pack('H*') }
+    let(:outline) { ['407023081a0000001a0000000a0000000000000002000000'].pack('H*') }
+    let(:heap) { ['6162636465666768696a6b6c6d6e6f707172737475767778797a00'].pack('H*') }
+
+    it 'reads one held inside the object' do
+      { empty => '', inline => 'AAAABBBBCCCCDDD' }.each do |bytes, expected|
+        string = MemoryIO::IO.new(StringIO.new(bytes), pointer_size: 4).read(1, as: :'cpp/string')
+        expect(string.data).to eq expected
+        expect(string.capacity).to eq described_class::LOCAL_CAPACITY
+      end
+    end
+
+    it 'follows dataplus to one held on the heap' do
+      memory = RecordedMemory.new(0x407ff424 => outline, 0x8237040 => heap)
+      string = MemoryIO::IO.new(memory, pointer_size: 4).read(1, from: 0x407ff424, as: :'cpp/string')
+      expect(string.data).to eq 'abcdefghijklmnopqrstuvwxyz'
+      expect(string.length).to eq 26
+      expect(string.capacity).to eq 26
+      expect(string.dataplus).to eq 0x8237040
+    end
   end
 
   it 'reads a string laid out unlike this host' do
