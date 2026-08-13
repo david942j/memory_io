@@ -105,6 +105,29 @@ The std::string class can be seen as:
     end
   end
 
+  it 'stops at an object it cannot read in full' do
+    # points its characters at 0x1000, which the stream does not reach
+    dangling = [0x1000, 26, 26].pack('L<3') + ("\x00" * 12)
+    io = MemoryIO::IO.new(StringIO.new(dangling), pointer_size: 4)
+    expect(io.read(1, as: :'cpp/string')).to be nil
+    expect(io.read(1, from: 0, as: :'cpp/string', force_array: true)).to eq []
+    tagged = MemoryIO::Stream.new(StringIO.new(dangling), MemoryIO::Context.new(pointer_size: 4))
+    expect { described_class.read(tagged) }.to raise_error(EOFError)
+
+    # the object itself ends before the characters it holds inline
+    truncated = MemoryIO::IO.new(StringIO.new("\x00" * 10), pointer_size: 4)
+    expect(truncated.read(1, as: :'cpp/string')).to be nil
+  end
+
+  it 'leaves the stream where it was when it cannot follow dataplus' do
+    dangling = "pad!#{[0x1000, 26, 26].pack('L<3')}#{"\x00" * 12}"
+    stream = StringIO.new(dangling)
+    tagged = MemoryIO::Stream.new(stream, MemoryIO::Context.new(pointer_size: 4))
+    stream.pos = 4
+    expect { described_class.read(tagged) }.to raise_error(EOFError)
+    expect(stream.pos).to eq 28
+  end
+
   it 'warns when data is set beyond capacity' do
     log = StringIO.new
     MemoryIO.logger = Logger.new(log, formatter: ->(_severity, _datetime, _progname, msg) { msg })

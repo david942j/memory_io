@@ -3,6 +3,7 @@
 require 'memory_io/context'
 require 'memory_io/logger'
 require 'memory_io/types/type'
+require 'memory_io/util'
 
 module MemoryIO
   module Types
@@ -75,6 +76,11 @@ module MemoryIO
           #
           # @return [CPP::String]
           #
+          # @raise [EOFError]
+          #   The object is incomplete, or its characters cannot be read from
+          #   where it points. {MemoryIO::IO#read} answers with the objects it
+          #   read in full rather than one that is partly filled in.
+          #
           # @example
           #   # echo '#include <string>\n#include <cstdio>\nint main() {' > a.cpp && \
           #   # echo 'std::string a="abcd"; printf("%p\\n", &a);' >> a.cpp && \
@@ -89,11 +95,11 @@ module MemoryIO
           def read(stream)
             dataplus = read_size_t(stream)
             length = read_size_t(stream)
-            union = stream.read(LOCAL_CAPACITY + 1)
+            union = MemoryIO::Util.read_exactly(stream, LOCAL_CAPACITY + 1)
             if length > LOCAL_CAPACITY
               context = MemoryIO::Context.of(stream)
               capacity = MemoryIO::Util.unpack(union[0, context.pointer_size], context.endian)
-              data = keep_pos(stream, pos: dataplus) { |s| s.read(length) }
+              data = keep_pos(stream, pos: dataplus) { |s| MemoryIO::Util.read_exactly(s, length) }
             else
               capacity = LOCAL_CAPACITY
               data = union[0, length]
