@@ -19,7 +19,7 @@ Read/Write complicated structures in memory easily.
   s.homepage      = 'https://github.com/david942j/memory_io'
   s.metadata['rubygems_mfa_required'] = 'true'
 
-  s.required_ruby_version = '>= 3.2'
+  s.required_ruby_version = '>= 3.3'
 
   s.add_dependency 'dentaku', '~> 4'
   s.add_dependency 'elftools', '>= 1.3', '< 3.0'
