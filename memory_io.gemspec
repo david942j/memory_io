@@ -22,7 +22,7 @@ Read/Write complicated structures in memory easily.
   s.required_ruby_version = '>= 3.2'
 
   s.add_dependency 'dentaku', '~> 4'
-  s.add_dependency 'elftools', '~> 1.3'
+  s.add_dependency 'elftools', '>= 1.3', '< 3.0'
   s.add_dependency 'logger', '>= 1.6'
 
   s.add_development_dependency 'ostruct', '>= 0.6'
