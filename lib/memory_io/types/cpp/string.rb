@@ -62,13 +62,11 @@ module MemoryIO
         #
         # @return [String]
         def inspect
-          # rubocop:disable Lint/FormatParameterMismatch
-          format("#<%s @data=%s, @capacity=%d, @dataplus=0x%0#{SIZE_T * 2}x>",
+          format('#<%s @data=%s, @capacity=%d, @dataplus=0x%s>',
                  self.class.name,
                  data.inspect,
                  capacity,
-                 dataplus)
-          # rubocop:enable Lint/FormatParameterMismatch
+                 dataplus.to_s(16).rjust(SIZE_T * 2, '0'))
         end
 
         class << self
